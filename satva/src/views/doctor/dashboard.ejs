@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HealthCare – Dr. Michael Chen</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+    <script src="/js/checkAuth.js" ></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <!-- ───────────── NAVBAR ───────────── -->
+<%-include('partials/header.ejs')%>
+
+  <!-- ───────────── MAIN CONTENT ───────────── -->
+  <main class="max-w-7xl mx-auto px-6 py-8 space-y-6">
+
+    <!-- Doctor Info -->
+    <!-- <div>
+      <h1 class="text-2xl font-bold text-gray-900" id="doctor-info"></h1>
+      <p class="text-gray-500 text-sm mt-0.5" id="doctor-special">Cardiologist &bull; 15 years experience</p>
+    </div> -->
+
+  <%-include('partials/stats.ejs');%>
+
+    <!-- Tab Navigation -->
+    <div class="border-b border-gray-200">
+      <nav class="-mb-px flex gap-6" aria-label="Tabs">
+        <button onclick="setTab('today')"   class="tab-btn tab-today-btn pb-3 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-teal-600 hover:border-teal-300 transition">Today's Schedule</button>
+        <button onclick="setTab('weekly')"  class="tab-btn  tab-weekly-btn pb-3 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-teal-600 hover:border-teal-300 transition">Weekly Schedule</button>
+        <button onclick="setTab('patients')" class="tab-btn tab-patients-btn pb-3 text-sm font-medium text-teal-600 border-b-2 border-teal-600 transition">Patient List</button>
+        <!-- <button onclick="setTab('records')" class="tab-btn pb-3 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-teal-600 hover:border-teal-300 transition">Medical Records</button> -->
+      </nav>
+    </div>
+
+    <!-- Patient List -->
+     <%-include('patient_list.ejs');%>
+   <!-- /tab-patients -->
+    
+    <%- include('today_schedule.ejs');%>
+    <!-- Placeholder panels for other tabs -->
+    <%- include('weekly_schedule.ejs');%>
+    <div id="tab-records" class="tab-panel hidden"><p class="text-gray-400 text-sm py-8 text-center">Medical records will appear here.</p></div>
+
+  </main>
+
+ 
+  <!-- <script src="/js/doctor.js"></script>
+  <script src="/js/today_schedule.js"></script> -->
+
+   <script>
+    const tabMap = { today: 'tab-today', weekly: 'tab-weekly', patients: 'tab-patients', records: 'tab-records' };
+
+    
+    const tab_panel=localStorage.getItem('tab-panel')
+   
+    if(!tab_panel){
+    
+      setTab('today')
+    }
+    else{
+    setTab(tab_panel)}
+
+    function setTab(key) {
+      let btn=document.querySelector(`.${tabMap[key]}-btn`)
+
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
+   
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.remove('text-teal-600', 'border-teal-600');
+        b.classList.add('text-gray-500', 'border-transparent');
+      });
+      // show selected
+      localStorage.setItem("tab-panel",key) 
+    
+      document.getElementById(tabMap[key]).classList.remove('hidden');
+      
+      btn.classList.remove('text-gray-500', 'border-transparent');
+      btn.classList.add('text-teal-600', 'border-teal-600');
+    }
+  </script>
+  <script src="/js/doctor.js"></script>
+  <script src="/js/today_schedule.js"></script>
+  <script src="/js/doctor-notification.js"></script>
+  <script src="/js/weekly_schedule.js"></script>
+</body>
+</html>

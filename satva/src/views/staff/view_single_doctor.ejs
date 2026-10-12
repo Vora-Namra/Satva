@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Doctor Profile</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+</head>
+<body class="bg-gray-50 font-sans">
+
+  <!-- Navbar -->
+ <div class="max-w-7xl mx-auto px-6 pt-7">
+ <%- include('../admin/navbar.ejs') %>
+ </div>
+
+  <div class="max-w-5xl mx-auto px-6 py-8">
+
+    <!-- Back + Edit -->
+    <div class="flex items-center justify-between mb-6">
+      <button onclick="window.history.back()" class="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 transition">
+        <i class="ti ti-arrow-left text-base"></i>
+        Back to Doctors
+      </button>
+     
+    </div>
+
+    <!-- Loading -->
+    <div id="loading-state" class="flex flex-col items-center justify-center py-24 gap-3">
+      <i class="ti ti-loader-2 text-3xl text-green-600 animate-spin"></i>
+      <p class="text-sm text-gray-500">Loading doctor profile...</p>
+    </div>
+
+    <!-- Error -->
+    <div id="error-state" class="hidden flex flex-col items-center justify-center py-24 gap-3">
+      <i class="ti ti-alert-circle text-3xl text-red-400"></i>
+      <p class="text-sm font-medium text-gray-700">Failed to load doctor</p>
+      <p id="error-msg" class="text-xs text-gray-400"></p>
+      <button onclick="loadDoctor()" class="mt-2 text-sm text-green-600 hover:underline">Try again</button>
+    </div>
+
+    <!-- Profile Card -->
+    <div id="profile-card" class="hidden space-y-5">
+
+      <!-- Avatar + Name + Status -->
+      <div class="bg-white border border-gray-200 rounded-xl p-6 flex items-center gap-5">
+        <div id="avatar"
+          class="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center text-green-700 text-xl font-semibold shrink-0">
+        </div>
+        <div class="flex-1 min-w-0">
+          <h1 id="doctor-name" class="text-xl font-medium text-gray-900"></h1>
+          <!-- specialties chips -->
+          <div id="specialty-chips" class="flex flex-wrap gap-1.5 mt-1.5"></div>
+        </div>
+        <span id="status-badge" class="shrink-0 text-xs font-medium px-3 py-1 rounded-full"></span>
+      </div>
+
+      <!-- VIEW MODE -->
+      <div id="view-mode" class="grid grid-cols-2 gap-5">
+
+        <!-- Personal / Account Info -->
+        <div class="bg-white border border-gray-200 rounded-xl p-5">
+          <p class="text-xs font-medium text-gray-400 uppercase tracking-wider mb-4">Account information</p>
+          <div class="space-y-3.5 text-sm">
+            <div class="flex items-center gap-3">
+              <i class="ti ti-id-badge text-gray-400 text-base w-5 shrink-0"></i>
+              <span class="text-gray-500 w-28 shrink-0">Doctor ID</span>
+              <span id="v-doctor-id" class="text-gray-900 font-medium"></span>
+            </div>
+            <div class="flex items-center gap-3">
+              <i class="ti ti-mail text-gray-400 text-base w-5 shrink-0"></i>
+              <span class="text-gray-500 w-28 shrink-0">Email</span>
+              <span id="v-email" class="text-gray-900 truncate"></span>
+            </div>
+            <div class="flex items-center gap-3">
+              <i class="ti ti-gender-bigender text-gray-400 text-base w-5 shrink-0"></i>
+              <span class="text-gray-500 w-28 shrink-0">Gender</span>
+              <span id="v-gender" class="text-gray-900 capitalize"></span>
+            </div>
+            <div class="flex items-center gap-3">
+              <i class="ti ti-calendar-plus text-gray-400 text-base w-5 shrink-0"></i>
+              <span class="text-gray-500 w-28 shrink-0">Joined</span>
+              <span id="v-joined" class="text-gray-900"></span>
+            </div>
+            <div class="flex items-center gap-3">
+              <i class="ti ti-shield text-gray-400 text-base w-5 shrink-0"></i>
+              <span class="text-gray-500 w-28 shrink-0">Role</span>
+              <span id="v-role" class="text-gray-900"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Professional Info -->
+        <div class="bg-white border border-gray-200 rounded-xl p-5">
+          <p class="text-xs font-medium text-gray-400 uppercase tracking-wider mb-4">Professional information</p>
+          <div class="space-y-3.5 text-sm">
+            <div class="flex items-center gap-3">
+              <i class="ti ti-clock text-gray-400 text-base w-5 shrink-0"></i>
+              <span class="text-gray-500 w-28 shrink-0">Experience</span>
+              <span id="v-experience" class="text-gray-900"></span>
+            </div>
+            <div class="flex items-center gap-3">
+              <i class="ti ti-currency-rupee text-gray-400 text-base w-5 shrink-0"></i>
+              <span class="text-gray-500 w-28 shrink-0">Consult Fee</span>
+              <span id="v-fee" class="text-gray-900"></span>
+            </div>
+            <div class="flex items-center gap-3">
+              <i class="ti ti-star text-gray-400 text-base w-5 shrink-0"></i>
+              <span class="text-gray-500 w-28 shrink-0">Rating</span>
+              <span id="v-rating" class="text-gray-900"></span>
+            </div>
+            <div class="flex items-start gap-3">
+              <i class="ti ti-file-text text-gray-400 text-base w-5 shrink-0 mt-0.5"></i>
+              <span class="text-gray-500 w-28 shrink-0">Bio</span>
+              <span id="v-bio" class="text-gray-900 leading-relaxed"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Specialties -->
+        <div class="bg-white border border-gray-200 rounded-xl p-5">
+          <p class="text-xs font-medium text-gray-400 uppercase tracking-wider mb-4">Specialties</p>
+          <div id="v-specialties" class="flex flex-wrap gap-2"></div>
+        </div>
+
+        <!-- Qualifications -->
+        <div class="bg-white border border-gray-200 rounded-xl p-5">
+          <p class="text-xs font-medium text-gray-400 uppercase tracking-wider mb-4">Qualifications</p>
+          <div id="v-qualifications" class="space-y-3"></div>
+        </div>
+
+      </div>
+
+     
+
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:3333/api/v1/staff';
+    let doctorData = null;
+
+    // ── Helpers ──────────────────────────────────────────────────────
+    function getDoctorId() {
+      const parts = window.location.pathname.split('/');
+      return parts[parts.length - 1];
+    }
+
+    function initials(firstName, lastName) {
+      const f = firstName?.[0] ?? '';
+      const l = lastName?.[0]  ?? '';
+      return (f + l).toUpperCase() || '?';
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '—';
+      return new Date(dateStr).toLocaleDateString('en-US', {
+        year: 'numeric', month: 'long', day: 'numeric'
+      });
+    }
+
+    function formatDateInput(dateStr) {
+      // convert to yyyy-mm-dd for <input type="date">
+      if (!dateStr) return '';
+      return new Date(dateStr).toISOString().split('T')[0];
+    }
+
+    // ── Populate VIEW mode ────────────────────────────────────────────
+    function populateView(doc) {
+      // Avatar + name
+      document.getElementById('avatar').textContent =
+        initials(doc.first_name, doc.last_name);
+
+      document.getElementById('doctor-name').textContent =
+        `${doc.first_name ?? ''} ${doc.last_name ?? ''}`.trim() || '—';
+
+      // Status badge
+      const badge = document.getElementById('status-badge');
+      const isDeactivated = doc.is_deactivated == 1 || doc.is_deactivated === true;
+      badge.textContent = isDeactivated ? 'Deactivated' : 'Active';
+      badge.className   = `shrink-0 text-xs font-medium px-3 py-1 rounded-full ${
+        isDeactivated ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-700'
+      }`;
+
+      // Account info
+      document.getElementById('v-doctor-id').textContent  = `DR-${String(doc.doctor_id).padStart(4,'0')}`;
+      document.getElementById('v-email').textContent      = doc.email      ?? '—';
+      document.getElementById('v-gender').textContent     = doc.gender     ?? '—';
+      document.getElementById('v-joined').textContent     = formatDate(doc.joined_at);
+      document.getElementById('v-role').textContent       = doc.role       ?? 'DOCTOR';
+
+      // Professional info
+      document.getElementById('v-experience').textContent =
+        doc.experience_years != null ? `${doc.experience_years} years` : '—';
+      document.getElementById('v-fee').textContent =
+        doc.consultation_fee != null
+          ? `${doc.currency_code ?? 'INR'} ${Number(doc.consultation_fee).toLocaleString()}`
+          : '—';
+      document.getElementById('v-rating').textContent =
+        doc.rating != null ? `${doc.rating} / 5` : '—';
+      document.getElementById('v-bio').textContent = doc.bio ?? '—';
+
+      // Specialties chips (in header)
+      const chipContainer = document.getElementById('specialty-chips');
+      const specialties   = doc.specialties ?? [];
+      chipContainer.innerHTML = specialties.length
+        ? specialties.map(s => `
+            <span class="text-xs bg-green-50 text-green-700 border border-green-200 px-2 py-0.5 rounded-full">
+              ${s.specialty_name}
+            </span>`).join('')
+        : '<span class="text-xs text-gray-400">No specialties</span>';
+
+      // Specialties section
+      const specEl = document.getElementById('v-specialties');
+      specEl.innerHTML = specialties.length
+        ? specialties.map(s => `
+            <span class="flex items-center gap-1.5 text-sm bg-green-50 text-green-700 border border-green-100 px-3 py-1.5 rounded-lg">
+              <i class="ti ti-stethoscope text-sm"></i>
+              ${s.specialty_name}
+            </span>`).join('')
+        : '<p class="text-sm text-gray-400">No specialties added</p>';
+
+      // Qualifications section
+      const qualEl        = document.getElementById('v-qualifications');
+      const qualifications = doc.qualifications ?? [];
+      qualEl.innerHTML = qualifications.length
+        ? qualifications.map(q => `
+            <div class="flex items-start gap-3 p-3 bg-gray-50 rounded-lg border border-gray-100">
+              <i class="ti ti-certificate text-green-600 text-base mt-0.5 shrink-0"></i>
+              <div>
+                <p class="text-sm font-medium text-gray-900">${q.degree ?? '—'}</p>
+                <p class="text-xs text-gray-500 mt-0.5">
+                  ${q.college_name ?? '—'}
+                  ${q.graduation_year ? `· ${q.graduation_year}` : ''}
+                </p>
+              </div>
+            </div>`).join('')
+        : '<p class="text-sm text-gray-400">No qualifications added</p>';
+    }
+
+
+   
+    // ── Load doctor ───────────────────────────────────────────────────
+    async function loadDoctor() {
+      const doctorId = getDoctorId();
+      document.getElementById('loading-state').classList.remove('hidden');
+      document.getElementById('error-state').classList.add('hidden');
+      document.getElementById('profile-card').classList.add('hidden');
+
+      try {
+        const token = localStorage.getItem('accessToken');
+
+        const res = await fetch(`${API_BASE}/doctors/${doctorId}`, {
+          headers: {
+            'Content-Type':  'application/json',
+            'Authorization': `Bearer ${token}`,
+          }
+        });
+
+        if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+
+        const json = await res.json();
+        doctorData  = json.data ?? json;
+
+        console.log('doctor data:', doctorData); // inspect in console
+
+        populateView(doctorData);
+        document.getElementById('loading-state').classList.add('hidden');
+        document.getElementById('profile-card').classList.remove('hidden');
+
+      } catch (err) {
+        document.getElementById('loading-state').classList.add('hidden');
+        document.getElementById('error-state').classList.remove('hidden');
+        document.getElementById('error-msg').textContent = err.message;
+        console.error(err);
+      }
+    }
+
+    // ── Save doctor ───────────────────────────────────────────────────
+    async function saveDoctor() {
+      const doctorId = getDoctorId();
+      const saveBtn  = document.getElementById('save-btn');
+      const errEl    = document.getElementById('save-error');
+
+      errEl.classList.add('hidden');
+      saveBtn.disabled  = true;
+      saveBtn.innerHTML = '<i class="ti ti-loader-2 animate-spin text-base"></i> Saving...';
+
+      // Only send fields that exist in doctors table
+      const payload = {
+        first_name:        document.getElementById('e-first-name').value.trim(),
+        last_name:         document.getElementById('e-last-name').value.trim(),
+        gender:            document.getElementById('e-gender').value,
+        experience_years:  Number(document.getElementById('e-experience').value) || null,
+        consultation_fee:  parseFloat(document.getElementById('e-fee').value)    || null,
+        joined_at:         document.getElementById('e-joined').value              || null,
+        bio:               document.getElementById('e-bio').value.trim()          || null,
+        is_deactivated:    document.getElementById('e-status').value === 'true',
+      };
+
+      try {
+        const token = localStorage.getItem('accessToken');
+
+      const res = await fetch(`${API_BASE}/doctors/${doctorId}`, {
+  method: 'PUT',
+  headers: {
+    'Content-Type':  'application/json',
+    'Authorization': `Bearer ${token}`,
+  },
+  body: JSON.stringify(payload),
+});
+
+        if (!res.ok) {
+          const errJson = await res.json().catch(() => ({}));
+          throw new Error(errJson.message ?? `${res.status} ${res.statusText}`);
+        }
+
+        const json = await res.json();
+        // merge updated fields into doctorData
+        doctorData = { ...doctorData, ...payload, ...(json.data ?? {}) };
+
+        populateView(doctorData);
+
+      } catch (err) {
+        errEl.textContent = err.message;
+        errEl.classList.remove('hidden');
+        console.error(err);
+      } finally {
+        saveBtn.disabled  = false;
+        saveBtn.innerHTML = '<i class="ti ti-check text-base"></i> Save Changes';
+      }
+    }
+
+    loadDoctor();
+  </script>
+
+</body>
+</html> 

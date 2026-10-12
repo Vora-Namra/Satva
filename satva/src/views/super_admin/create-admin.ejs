@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Satva — Create Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#10A37F",
+                        "primary-dark": "#0d8a6a",
+                        "primary-light": "#e6f7f3",
+                        "bg-page": "#f0faf6",
+                        dark: "#0f1923",
+                    },
+                    fontFamily: {
+                        sans: ["'DM Sans'", "system-ui", "sans-serif"],
+                        display: ["'Playfair Display'", "Georgia", "serif"],
+                    },
+                },
+            },
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+        body { font-family: "DM Sans", sans-serif; }
+    </style>
+    <script type="module">
+        import { checkSuperAdminJwt } from '/js/check-super-admin-jwt.js';
+        checkSuperAdminJwt();
+    </script>
+</head>
+<body class="bg-bg-page text-gray-800 min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-screen-2xl mx-auto px-6 py-4 flex items-center justify-between">
+            <a href="/super-admin/dashboard" class="flex items-center gap-2.5">
+                <div class="bg-primary rounded-lg p-1.5">
+                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                </div>
+                <span class="text-xl font-bold text-gray-900 font-display">Satva</span>
+            </a>
+            <div class="flex items-center gap-4">
+                <a href="/super-admin/dashboard" class="text-sm font-semibold text-gray-600 hover:text-primary transition flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-3xl w-full mx-auto px-6 py-10">
+        <div class="mb-8 flex items-center gap-4">
+            <a href="/super-admin/dashboard" class="p-2 rounded-full hover:bg-gray-200 transition text-gray-600">
+                <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800">Create New Administrator</h2>
+                <p class="text-gray-500 text-sm mt-1">Add a new admin account to the platform.</p>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
+            <form action="/api/v1/super-admin/create-admin" method="POST" class="space-y-6" novalidate>
+                <!-- First and Last Name -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="first_name" class="block text-sm font-medium text-gray-700">First Name</label>
+                        <div class="mt-1 relative rounded-md shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                <i class="fa-solid fa-user"></i>
+                            </div>
+                            <input type="text" name="first_name" id="first_name" required
+                                class="focus:ring-primary focus:border-primary block w-full pl-10 sm:text-sm border-gray-300 rounded-lg p-3 border outline-none transition"
+                                placeholder="e.g. John">
+                        </div>
+                        <p id="firstNameError" class="mt-1 text-sm text-red-500 hidden"></p>
+                    </div>
+                    <div>
+                        <label for="last_name" class="block text-sm font-medium text-gray-700">Last Name</label>
+                        <div class="mt-1 relative rounded-md shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                <i class="fa-solid fa-user"></i>
+                            </div>
+                            <input type="text" name="last_name" id="last_name" required
+                                class="focus:ring-primary focus:border-primary block w-full pl-10 sm:text-sm border-gray-300 rounded-lg p-3 border outline-none transition"
+                                placeholder="e.g. Doe">
+                        </div>
+                        <p id="lastNameError" class="mt-1 text-sm text-red-500 hidden"></p>
+                    </div>
+                </div>
+
+                <!-- Hospital Selection -->
+                <div>
+                    <label for="hospital_id" class="block text-sm font-medium text-gray-700">Hospital</label>
+                    <div class="mt-1 relative rounded-md shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                            <i class="fa-solid fa-hospital"></i>
+                        </div>
+                        <select name="hospital_id" id="hospital_id" class="focus:ring-primary focus:border-primary block w-full pl-10 sm:text-sm border-gray-300 rounded-lg p-3 border outline-none transition appearance-none bg-white" required>
+                            <option value="">Select a Hospital</option>
+                            <% if (typeof hospitals !== 'undefined' && hospitals.length > 0) { %>
+                                <% hospitals.forEach(hospital => { %>
+                                    <option value="<%= hospital.hospital_id %>"><%= hospital.hospital_name %></option>
+                                <% }) %>
+                            <% } %>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-400">
+                            <i class="fa-solid fa-chevron-down text-xs"></i>
+                        </div>
+                    </div>
+                    <p id="hospitalError" class="mt-1 text-sm text-red-500 hidden"></p>
+                </div>
+
+                <!-- Email -->
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700">Email Address</label>
+                    <div class="mt-1 relative rounded-md shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                            <i class="fa-solid fa-envelope"></i>
+                        </div>
+                        <input type="email" name="email" id="email" required
+                            class="focus:ring-primary focus:border-primary block w-full pl-10 sm:text-sm border-gray-300 rounded-lg p-3 border outline-none transition"
+                            placeholder="admin@satva.health">
+                    </div>
+                    <p id="emailError" class="mt-1 text-sm text-red-500 hidden"></p>
+                </div>
+
+                <!-- Password -->
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                    <div class="mt-1 relative rounded-md shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                            <i class="fa-solid fa-lock"></i>
+                        </div>
+                        <input type="password" name="password" id="password" required
+                            class="focus:ring-primary focus:border-primary block w-full pl-10 sm:text-sm border-gray-300 rounded-lg p-3 border outline-none transition"
+                            placeholder="••••••••">
+                    </div>
+                    <p id="passwordError" class="mt-1 text-sm text-red-500 hidden"></p>
+                </div>
+
+                
+                <!-- Status -->
+                <div>
+                    <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+                    <div class="mt-1 relative rounded-md shadow-sm">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                            <i class="fa-solid fa-toggle-on"></i>
+                        </div>
+                        <select name="status" id="status" class="focus:ring-primary focus:border-primary block w-full pl-10 sm:text-sm border-gray-300 rounded-lg p-3 border outline-none transition appearance-none bg-white">
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                        </select>
+                        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-400">
+                            <i class="fa-solid fa-chevron-down text-xs"></i>
+                        </div>
+                    </div>
+                    <p id="statusError" class="mt-1 text-sm text-red-500 hidden"></p>
+                </div>
+
+                <div class="pt-4 flex items-center justify-end gap-4 border-t border-gray-100 mt-6">
+                    <a href="/super-admin/dashboard" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition">Cancel</a>
+                    <button type="submit" class="bg-primary hover:bg-primary-dark text-white font-medium py-2.5 px-6 rounded-lg shadow-sm transition flex items-center gap-2">
+                        <i class="fa-solid fa-check"></i> Create Admin
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <%- include("../error_flash") %>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const form = document.querySelector("form");
+            if(form) {
+                form.addEventListener("submit", async (e) => {
+                    e.preventDefault();
+                    const submitBtn = form.querySelector('button[type="submit"]');
+                    const originalBtnText = submitBtn.innerHTML;
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Processing...';
+                    let isValid = true;
+                    const firstNameEle = document.getElementById("first_name");
+                    const lastNameEle = document.getElementById("last_name");
+                    const emailEle = document.getElementById("email");
+                    const passwordEle = document.getElementById("password");
+                    const hospitalEle = document.getElementById("hospital_id");
+                    const statusEle = document.getElementById("status");
+                    const firstName = document.getElementById("first_name").value.trim();
+                    const lastName = document.getElementById("last_name").value.trim();
+                    const email = document.getElementById("email").value.trim();
+                    const password = document.getElementById("password").value.trim();
+                    const hospital = document.getElementById("hospital_id").value.trim();
+                    const status = document.getElementById("status").value.trim();
+
+                    // All error message elements
+                    const firstNameError = document.getElementById("firstNameError");
+                    const lastNameError = document.getElementById("lastNameError");
+                    const emailError = document.getElementById("emailError");
+                    const passwordError = document.getElementById("passwordError");
+                    const hospitalError = document.getElementById("hospitalError");
+                    const statusError = document.getElementById("statusError");
+                    // Remove all errors
+                    const inputEle = [firstNameEle , lastNameEle , emailEle , passwordEle , hospitalEle , statusEle];
+                    inputEle.forEach((e) => e.classList.remove("border-red-500"));
+                    [firstNameError,lastNameError , emailError , passwordError , hospitalError , statusError].forEach(ele => {
+                        ele.classList.add("hidden");
+                        ele.textContent = "";
+                    })
+                    if(firstName.length == 0){
+                        firstNameError.textContent = "Firstname is required";
+                        firstNameError.classList.remove("hidden");
+                        firstNameEle.classList.add("border-red-500");
+                        isValid = false;
+                    }
+                    else if(firstName.length < 2){
+                        firstNameError.textContent = "Firstname should have minimum 2 characters";
+                        firstNameError.classList.remove("hidden");
+                        firstNameEle.classList.add("border-red-500");
+
+                        isValid = false;
+                    }
+                    if(lastName.length == 0){
+                        lastNameError.textContent = "Lastname is required";
+                        lastNameError.classList.remove("hidden");
+                        lastNameEle.classList.add("border-red-500");
+                        isValid = false;
+                    }
+                    else if(lastName.length < 2){
+                        lastNameError.textContent = "Lastname should have minimum 2 characters";
+                        lastNameError.classList.remove("hidden");
+                        lastNameEle.classList.add("border-red-500");
+
+                        isValid = false;
+                    }  
+                    if(email.length == 0){
+                        emailError.textContent = "Email is required";
+                        emailError.classList.remove("hidden");
+                        emailEle.classList.add("border-red-500");
+                        isValid = false;
+                    }
+                    else if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+                        emailError.textContent = "Please enter a valid email address";
+                        emailError.classList.remove("hidden");
+                        emailEle.classList.add("border-red-500");
+                        isValid = false;
+                    }
+                    if(password.length == 0){
+                        passwordError.textContent = "Password is required";
+                        passwordError.classList.remove("hidden");
+                        passwordEle.classList.add("border-red-500");
+                        isValid = false;
+                    }
+                    else if(password.length < 8){
+                        passwordError.textContent = "Passkey must be at least 8 characters";
+                        passwordError.classList.remove("hidden");
+                        passwordEle.classList.add("border-red-500");
+                        isValid = false;
+                    }
+                    else if (
+                        !/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/.test(
+                        password,
+                        )
+                    ){
+                        passwordError.textContent =
+                            "Passkey should contain at least one lowercase, uppercase, digit, and special symbol";
+                        passwordError.classList.remove("hidden");
+                        passwordEle.classList.add("border-red-500");
+                        isValid = false;
+                    }
+                    if(hospital == ""){
+                        hospitalError.textContent = 'Select valid hospital';
+                        hospitalError.classList.remove("hidden");
+                        hospitalEle.classList.add("border-red-500");
+                        isValid = false;
+                    }
+                    if(!isValid){
+                        e.preventDefault();
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnText;
+                        
+                    }
+                    else{
+
+                        try {
+                            const formData = new FormData(form);
+                            const data = Object.fromEntries(formData.entries());
+                            const url = form.action;
+                            
+                            const response = await fetch(url, {
+                                method: "POST",
+                                headers: { 
+                                  'Content-Type': 'application/json',
+                                  'Authorization': `Bearer ${localStorage.getItem("accessToken")}`
+                                },
+                                body: JSON.stringify(data)
+                            });
+    
+                            const result = await response.json();
+    
+                            if (!response.ok || result.statusCode >= 400) {
+                                throw new Error(result.message || "An error occurred");
+                            }
+    
+                            if(typeof setFlash === 'function') {
+                                setFlash(result.message || "Admin created successfully", "success");
+                            }
+                            
+                            setTimeout(() => {
+                                window.location.href = "/super-admin/dashboard";
+                            }, 500);
+    
+                        } catch (error) {
+                            if(typeof showFlash === 'function') {
+                                showFlash(error.message || "Failed to process request", "error");
+                            } else {
+                                alert(error.message || "Failed to process request");
+                            }
+                        } finally {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = originalBtnText;
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

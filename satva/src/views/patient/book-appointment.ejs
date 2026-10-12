@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Satva — Book Appointment</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script type="module">
+    import { checkJwt } from "/js/check-jwt.js";
+    checkJwt();
+  </script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#10A37F",
+            "primary-dark": "#0d8a6a",
+            "primary-light": "#e6f7f3",
+            "bg-page": "#f0faf6",
+            dark: "#0f1923",
+          },
+          fontFamily: {
+            sans: ["'DM Sans'", "system-ui", "sans-serif"],
+            display: ["'Playfair Display'", "Georgia", "serif"],
+          },
+          keyframes: {
+            fadeUp: {
+              "0%": { opacity: 0, transform: "translateY(24px)" },
+              "100%": { opacity: 1, transform: "translateY(0)" },
+            },
+          },
+          animation: {
+            fadeUp: "fadeUp 0.6s ease both",
+          },
+        },
+      },
+    };
+  </script>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap"
+    rel="stylesheet" />
+
+  <style>
+    body {
+      font-family: "DM Sans", sans-serif;
+    }
+
+    .nav-link {
+      position: relative;
+    }
+
+    .nav-link::after {
+      content: "";
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: #10a37f;
+      transition: width 0.3s;
+    }
+
+    .nav-link:hover::after {
+      width: 100%;
+    }
+
+    .card-hover {
+      transition: transform 0.25s, box-shadow 0.25s;
+    }
+
+    .card-hover:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 32px rgba(16, 163, 127, 0.12);
+    }
+
+    .step-active {
+      background: #10a37f;
+      color: white;
+    }
+
+    .step-completed {
+      background: #10a37f;
+      color: white;
+    }
+
+    .step-inactive {
+      background: #f0faf6;
+      color: #94a3b8;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #10a37f !important;
+      box-shadow: 0 0 0 3px rgba(16, 163, 127, 0.12);
+    }
+
+    .slot-btn.selected,
+    .date-btn.selected,
+    .type-btn.selected {
+      border-color: #10a37f !important;
+      background: #e6f7f3 !important;
+      color: #10a37f !important;
+    }
+  </style>
+</head>
+
+<body class="bg-bg-page text-gray-800 min-h-screen">
+    <%- include('../partials/patient-header', { title: 'book-appointment' }) %>
+
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+      <div class="flex items-center justify-center gap-4 sm:gap-8">
+        <div class="flex flex-col items-center">
+          <div id="stepDot1"
+            class="w-12 h-12 rounded-full step-active flex items-center justify-center font-bold text-lg">1</div>
+          <div id="stepLabel1" class="mt-2 text-sm sm:text-base font-semibold text-dark">Find Doctor</div>
+        </div>
+        <div class="w-10 sm:w-16 h-[2px] bg-gray-200"></div>
+        <div class="flex flex-col items-center">
+          <div id="stepDot2"
+            class="w-12 h-12 rounded-full step-inactive flex items-center justify-center font-bold text-lg">2</div>
+          <div id="stepLabel2" class="mt-2 text-sm sm:text-base font-semibold text-gray-400">Choose Time</div>
+        </div>
+        <div class="w-10 sm:w-16 h-[2px] bg-gray-200"></div>
+        <div class="flex flex-col items-center">
+          <div id="stepDot3"
+            class="w-12 h-12 rounded-full step-inactive flex items-center justify-center font-bold text-lg">3</div>
+          <div id="stepLabel3" class="mt-2 text-sm sm:text-base font-semibold text-gray-400">Details</div>
+        </div>
+        <div class="w-10 sm:w-16 h-[2px] bg-gray-200"></div>
+        <div class="flex flex-col items-center">
+          <div id="stepDot4"
+            class="w-12 h-12 rounded-full step-inactive flex items-center justify-center font-bold text-lg">4</div>
+          <div id="stepLabel4" class="mt-2 text-sm sm:text-base font-semibold text-gray-400">Payment</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="statusMsg" class="hidden mb-6 rounded-2xl border px-4 py-3 text-sm"></div>
+
+    <!-- STEP 1: SEARCH DOCTORS -->
+    <section id="searchSection" class="animate-fadeUp">
+      <div class="mb-6">
+        <h2 class="font-display text-3xl sm:text-4xl font-bold text-dark mb-2">Find a Doctor</h2>
+        <p class="text-gray-500">Search by name, specialty, gender, hospital, and fee range.</p>
+      </div>
+
+      <div class="bg-white rounded-3xl border border-gray-200 shadow-sm p-5 sm:p-6 mb-6">
+        <div class="grid gap-4 lg:grid-cols-12">
+          <div class="lg:col-span-4">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Doctor Name</label>
+            <div class="relative">
+              <svg class="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none"
+                stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="m21 21-4.35-4.35m1.35-5.65a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+              <input id="searchName" type="text" placeholder="Search doctors by name..."
+                class="w-full pl-10 pr-4 py-3 rounded-2xl border border-gray-200 bg-white" />
+            </div>
+          </div>
+
+          <div class="lg:col-span-3">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Specialty</label>
+            <select id="searchSpecialty" class="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-white">
+              <option value="">All Specialties</option>
+              <option value="Cardiology">Cardiology</option>
+              <option value="Dermatology">Dermatology</option>
+              <option value="General Medicine">General Medicine</option>
+              <option value="Pediatrics">Pediatrics</option>
+              <option value="Orthopedics">Orthopedics</option>
+              <option value="Gynecology">Gynecology</option>
+              <option value="Neurology">Neurology</option>
+            </select>
+          </div>
+
+          <div class="lg:col-span-2">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Gender</label>
+            <select id="searchGender" class="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-white">
+              <option value="">Any</option>
+              <option value="MALE">Male</option>
+              <option value="FEMALE">Female</option>
+              <option value="OTHER">Other</option>
+            </select>
+          </div>
+
+          <div class="lg:col-span-3">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Hospital ID</label>
+            <input id="searchHospitalId" type="number" min="1" placeholder="Optional"
+              class="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-white" />
+          </div>
+
+          <div class="lg:col-span-6">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Minimum Fee</label>
+            <input id="minFee" type="number" min="0" placeholder="Optional"
+              class="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-white" />
+          </div>
+
+          <div class="lg:col-span-6">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Maximum Fee</label>
+            <input id="maxFee" type="number" min="0" placeholder="Optional"
+              class="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-white" />
+          </div>
+        </div>
+
+        <div class="mt-5 flex flex-col sm:flex-row gap-3">
+          <button id="searchBtn" type="button"
+            class="bg-primary hover:bg-primary-dark text-white px-5 py-3 rounded-2xl font-semibold transition">
+            Search Doctors
+          </button>
+          <button id="clearBtn" type="button"
+            class="bg-primary-light text-primary hover:bg-green-100 px-5 py-3 rounded-2xl font-semibold transition">
+            Clear Filters
+          </button>
+        </div>
+      </div>
+
+      <div id="doctorsContainer" class="space-y-5">
+        <div class="bg-white rounded-3xl border border-gray-200 shadow-sm p-8 text-center text-gray-500">
+          Search for a doctor to begin.
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 2: SLOT SELECTION -->
+    <section id="slotSection" class="hidden animate-fadeUp">
+      <button id="backToSearchBtn" class="inline-flex items-center gap-2 text-gray-500 hover:text-dark mb-6">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path>
+        </svg>
+        Back to search
+      </button>
+
+      <div class="bg-white rounded-3xl border border-gray-200 shadow-sm p-5 sm:p-7">
+        <div class="flex flex-col lg:flex-row gap-6 lg:items-start">
+          <div class="lg:flex-1">
+            <div class="flex items-center gap-4">
+              <div id="selectedDoctorAvatar"
+                class="w-16 h-16 rounded-full bg-primary text-white flex items-center justify-center text-xl font-bold">
+                D
+              </div>
+              <div>
+                <h3 id="selectedDoctorName" class="font-display text-2xl font-bold text-dark">Doctor</h3>
+                <p id="selectedDoctorMeta" class="text-gray-500">Specialty • Fee</p>
+              </div>
+            </div>
+
+            <div class="mt-8">
+              <h4 class="text-lg font-bold text-dark mb-3">Select Appointment Type</h4>
+              <div class="grid md:grid-cols-2 gap-4">
+                <button type="button" data-type="IN_PERSON"
+                  class="type-btn rounded-2xl border-2 border-gray-200 p-4 text-left transition">
+                  <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-xl bg-primary-light text-primary flex items-center justify-center">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M12 11c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4Zm0 2c-4.42 0-8 2.24-8 5v2h16v-2c0-2.76-3.58-5-8-5Z">
+                        </path>
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="font-semibold text-dark">In-Person Visit</div>
+                      <div class="text-sm text-gray-500">Visit the clinic</div>
+                    </div>
+                  </div>
+                </button>
+
+                <button type="button" data-type="TELEMEDICINE"
+                  class="type-btn rounded-2xl border-2 border-gray-200 p-4 text-left transition">
+                  <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-xl bg-primary-light text-primary flex items-center justify-center">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14m-10 4h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2Z">
+                        </path>
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="font-semibold text-dark">Telemedicine</div>
+                      <div class="text-sm text-gray-500">Video consultation</div>
+                    </div>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <div class="mt-8">
+              <h4 class="text-lg font-bold text-dark mb-3">Select Date</h4>
+              <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-end">
+                <div class="w-full sm:max-w-xs">
+                  <label class="block text-sm font-semibold text-gray-700 mb-2">Appointment Date</label>
+                  <input id="slotDate" type="date"
+                    class="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-white" />
+                </div>
+                <button id="loadSlotsBtn" type="button"
+                  class="bg-primary hover:bg-primary-dark text-white px-5 py-3 rounded-2xl font-semibold transition">
+                  Load Slots
+                </button>
+              </div>
+              <p class="text-xs text-gray-500 mt-2">You can book up to 60 days in advance.</p>
+            </div>
+
+            <div class="mt-8">
+              <h4 class="text-lg font-bold text-dark mb-3">Available Time Slots</h4>
+              <div id="slotsContainer" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                <div class="col-span-full text-sm text-gray-500 border border-dashed border-gray-200 rounded-2xl p-5">
+                  Select a date to load time slots.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="lg:w-[340px]">
+            <div class="bg-bg-page rounded-3xl border border-gray-200 p-5 sticky top-6">
+              <h4 class="font-semibold text-dark text-lg mb-4">Summary</h4>
+
+              <div class="space-y-4">
+                <div>
+                  <div class="text-xs uppercase tracking-wide text-gray-500">Doctor</div>
+                  <div id="summaryDoctor" class="font-semibold text-dark">—</div>
+                </div>
+                <div>
+                  <div class="text-xs uppercase tracking-wide text-gray-500">Type</div>
+                  <div id="summaryType" class="font-semibold text-dark">—</div>
+                </div>
+                <div>
+                  <div class="text-xs uppercase tracking-wide text-gray-500">Date</div>
+                  <div id="summaryDate" class="font-semibold text-dark">—</div>
+                </div>
+                <div>
+                  <div class="text-xs uppercase tracking-wide text-gray-500">Time</div>
+                  <div id="summaryTime" class="font-semibold text-dark">—</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-8 flex justify-end">
+          <button id="goToDetailsBtn" type="button"
+            class="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-2xl font-semibold transition">
+            Continue
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 3: DETAILS -->
+    <section id="detailsSection" class="hidden animate-fadeUp">
+      <button id="backToSlotsBtn" class="inline-flex items-center gap-2 text-gray-500 hover:text-dark mb-6">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path>
+        </svg>
+        Back to time selection
+      </button>
+
+      <div class="grid lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2">
+          <div class="bg-white rounded-3xl border border-gray-200 shadow-sm p-5 sm:p-7">
+            <h3 class="font-display text-3xl font-bold text-dark mb-2">Appointment Details</h3>
+            <p class="text-gray-500 mb-8">Add brief notes and optional documents.</p>
+
+            <div class="space-y-6">
+              <div>
+                <label for="chiefComplaint" class="block text-sm font-semibold text-gray-700 mb-2">
+                  Chief Complaint / Reason for Visit <span class="text-red-500">*</span>
+                </label>
+                <textarea id="chiefComplaint" rows="5" maxlength="500"
+                  placeholder="Please describe your symptoms or reason for consultation..."
+                  class="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-white"></textarea>
+                <div class="mt-1 text-xs text-gray-500">Maximum 500 characters</div>
+              </div>
+
+              <div>
+                <label for="appointmentFor" class="block text-sm font-semibold text-gray-700 mb-2">
+                  What is this appointment for? <span class="text-gray-400 font-normal">(Optional)</span>
+                </label>
+                <input id="appointmentFor" type="text" placeholder="Myself / Family member name / purpose"
+                  class="w-full px-4 py-3 rounded-2xl border border-gray-200 bg-white" />
+              </div>
+
+              <div>
+                <label for="documentFile" class="block text-sm font-semibold text-gray-700 mb-2">
+                  Upload Documents <span class="text-gray-400 font-normal">(Optional)</span>
+                </label>
+                <div class="border-2 border-dashed border-gray-200 rounded-3xl p-6 text-center bg-bg-page">
+                  <p class="text-gray-500 mb-3">Upload medical reports, prescriptions, test results, or referral notes
+                  </p>
+                  <label for="documentFile"
+                    class="inline-flex items-center justify-center cursor-pointer bg-primary-light text-primary hover:bg-green-100 px-5 py-2.5 rounded-2xl font-semibold transition">
+                    Choose Files
+                  </label>
+                  <input id="documentFile" type="file" class="hidden" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" />
+                  <p id="fileName" class="text-xs text-gray-500 mt-3">No file selected</p>
+                </div>
+              </div>
+
+              <div class="bg-primary-light rounded-2xl p-4">
+                <label class="flex items-start gap-3 cursor-pointer">
+                  <input id="termsCheck" type="checkbox" class="mt-1 w-4 h-4 text-primary border-gray-300 rounded" />
+                  <span class="text-sm text-dark leading-relaxed">
+                    I agree to the terms and conditions and confirm that the information provided is accurate. I
+                    understand the cancellation policy and refund terms.
+                  </span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="bg-white rounded-3xl border border-gray-200 shadow-sm p-5 sm:p-7 sticky top-6">
+            <h4 class="font-semibold text-dark text-xl mb-5">Appointment Summary</h4>
+
+            <div class="space-y-4 mb-6">
+              <div>
+                <div class="text-xs uppercase tracking-wide text-gray-500">Doctor</div>
+                <div id="detailsDoctor" class="font-semibold text-dark">—</div>
+              </div>
+              <div>
+                <div class="text-xs uppercase tracking-wide text-gray-500">Specialty</div>
+                <div id="detailsSpecialty" class="font-semibold text-dark">—</div>
+              </div>
+              <div>
+                <div class="text-xs uppercase tracking-wide text-gray-500">Date & Time</div>
+                <div id="detailsDateTime" class="font-semibold text-dark">—</div>
+              </div>
+              <div>
+                <div class="text-xs uppercase tracking-wide text-gray-500">Type</div>
+                <div id="detailsType" class="font-semibold text-dark">—</div>
+              </div>
+            </div>
+
+            <div class="border-t border-gray-200 pt-4 mb-6 space-y-2">
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-500">Consultation Fee</span>
+                <span id="consultationFee" class="font-semibold text-dark">₹0</span>
+              </div>
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-500">Service Charge</span>
+                <span id="serviceCharge" class="font-semibold text-dark">₹0</span>
+              </div>
+              <div class="flex justify-between items-end pt-2 border-t border-gray-200 mt-2">
+                <span class="font-semibold text-dark">Total Amount</span>
+                <span id="totalAmount" class="text-3xl font-bold text-primary">₹0</span>
+              </div>
+            </div>
+
+            <button id="goToPaymentBtn" type="button"
+              class="w-full bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-2xl font-semibold transition">
+              Proceed to Payment
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 4: PAYMENT -->
+    <section id="paymentSection" class="hidden animate-fadeUp">
+      <button id="backToDetailsBtn" class="inline-flex items-center gap-2 text-gray-500 hover:text-dark mb-6">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path>
+        </svg>
+        Back to details
+      </button>
+
+      <div class="grid lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2">
+          <div class="bg-white rounded-3xl border border-gray-200 shadow-sm p-5 sm:p-7">
+            <h3 class="font-display text-3xl font-bold text-dark mb-2">Payment</h3>
+            <p class="text-gray-500 mb-8">Review the total and confirm your appointment.</p>
+
+            <div class="grid md:grid-cols-2 gap-4">
+              <button type="button"
+                class="payment-method-btn rounded-2xl border-2 border-primary bg-primary-light p-4 text-left">
+                <div class="font-semibold text-dark">Pay Online</div>
+                <div class="text-sm text-gray-500">Simulated confirmation flow</div>
+              </button>
+              <button type="button" class="payment-method-btn rounded-2xl border-2 border-gray-200 p-4 text-left">
+                <div class="font-semibold text-dark">UPI</div>
+                <div class="text-sm text-gray-500">Quick digital payment</div>
+              </button>
+            </div>
+
+            <div class="mt-8 bg-bg-page rounded-3xl p-5 border border-gray-200">
+              <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-xl bg-primary-light text-primary flex items-center justify-center">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                      d="M12 8v4l3 3m5-3a8 8 0 11-16 0 8 8 0 0116 0Z"></path>
+                  </svg>
+                </div>
+                <div>
+                  <div class="font-semibold text-dark">Secure Booking</div>
+                  <p class="text-sm text-gray-500">Your appointment will be created after payment confirmation.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="bg-white rounded-3xl border border-gray-200 shadow-sm p-5 sm:p-7 sticky top-6">
+            <h4 class="font-semibold text-dark text-xl mb-5">Payment Summary</h4>
+
+            <div class="space-y-3 mb-6">
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-500">Consultation Fee</span>
+                <span id="payConsultationFee" class="font-semibold text-dark">₹0</span>
+              </div>
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-500">Service Charge</span>
+                <span id="payServiceCharge" class="font-semibold text-dark">₹0</span>
+              </div>
+              <div class="flex justify-between text-sm border-t border-gray-200 pt-3">
+                <span class="text-gray-500">Total Amount</span>
+                <span id="payTotalAmount" class="font-bold text-primary text-xl">₹0</span>
+              </div>
+            </div>
+
+            <button id="payAndConfirmBtn" type="button"
+              class="w-full bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-2xl font-semibold transition">
+              Pay & Confirm Appointment
+            </button>
+
+            <p class="mt-3 text-xs text-gray-500 text-center">
+              By confirming, you agree to the cancellation and refund policy.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 5: CONFIRMATION -->
+    <section id="confirmationSection" class="hidden animate-fadeUp">
+      <div class="max-w-2xl mx-auto bg-white rounded-3xl border border-gray-200 shadow-sm p-6 sm:p-8 text-center">
+        <div class="w-20 h-20 mx-auto rounded-full bg-primary-light text-primary flex items-center justify-center mb-5">
+          <svg class="w-10 h-10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M12 22a10 10 0 100-20 10 10 0 000 20Z">
+            </path>
+          </svg>
+        </div>
+
+        <h3 class="font-display text-3xl font-bold text-dark mb-2">Appointment Confirmed</h3>
+        <p class="text-gray-500 mb-8">Your appointment has been booked successfully.</p>
+
+        <div class="bg-bg-page rounded-3xl p-5 sm:p-6 border border-gray-200 text-left mb-6">
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div>
+              <div class="text-xs uppercase tracking-wide text-gray-500">Confirmation No.</div>
+              <div id="confNo" class="font-bold text-dark text-lg">—</div>
+            </div>
+            <div>
+              <div class="text-xs uppercase tracking-wide text-gray-500">Appointment ID</div>
+              <div id="confAppointmentId" class="font-bold text-dark text-lg">—</div>
+            </div>
+            <div>
+              <div class="text-xs uppercase tracking-wide text-gray-500">Doctor</div>
+              <div id="confDoctor" class="font-semibold text-dark">—</div>
+            </div>
+            <div>
+              <div class="text-xs uppercase tracking-wide text-gray-500">Date & Time</div>
+              <div id="confDateTime" class="font-semibold text-dark">—</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+          <a href="/patient/dashboard"
+            class="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-2xl font-semibold transition">
+            Go to Dashboard
+          </a>
+          <!-- <a href="/appointment/my-appointments" class="bg-primary-light text-primary hover:bg-green-100 px-6 py-3 rounded-2xl font-semibold transition"> -->
+          <a href="/patient/my-appointments"
+            class="bg-primary-light text-primary hover:bg-green-100 px-6 py-3 rounded-2xl font-semibold transition">
+            View Appointments
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+
+  <script>
+    const token = localStorage.getItem("accessToken");
+
+    const state = {
+      step: 1,
+      doctors: [],
+      filteredDoctors: [],
+      selectedDoctor: null,
+      selectedDate: "",
+      selectedSlot: "",
+      selectedType: "IN_PERSON",
+      selectedFile: null,
+      slots: [],
+      bookingResponse: null,
+      consultationFee: 0,
+      serviceCharge: 0,
+      totalAmount: 0,
+    };
+
+    const el = (id) => document.getElementById(id);
+
+    function showMessage(message, type = "success") {
+      const box = el("statusMsg");
+      box.textContent = message;
+      box.className = "mb-6 rounded-2xl border px-4 py-3 text-sm";
+      if (type === "success") {
+        box.classList.add(
+          "border-green-200",
+          "bg-green-50",
+          "text-green-700",
+        );
+      } else {
+        box.classList.add("border-red-200", "bg-red-50", "text-red-700");
+      }
+      box.classList.remove("hidden");
+    }
+
+    function hideMessage() {
+      el("statusMsg").classList.add("hidden");
+    }
+
+    function setStep(step) {
+      state.step = step;
+
+      const sections = {
+        1: el("searchSection"),
+        2: el("slotSection"),
+        3: el("detailsSection"),
+        4: el("paymentSection"),
+        5: el("confirmationSection"),
+      };
+
+      Object.values(sections).forEach((section) =>
+        section.classList.add("hidden"),
+      );
+      sections[step].classList.remove("hidden");
+
+      const stepDots = [1, 2, 3, 4];
+      stepDots.forEach((n) => {
+        const dot = el(`stepDot${n}`);
+        const label = el(`stepLabel${n}`);
+        dot.className =
+          "w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg ";
+        if (step > n) {
+          dot.classList.add("step-completed");
+          dot.innerHTML = `
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4"></path>
+                </svg>
+              `;
+          label.className =
+            "mt-2 text-sm sm:text-base font-semibold text-dark";
+        } else if (step === n) {
+          dot.classList.add("step-active");
+          dot.textContent = n;
+          label.className =
+            "mt-2 text-sm sm:text-base font-semibold text-dark";
+        } else {
+          dot.classList.add("step-inactive");
+          dot.textContent = n;
+          label.className =
+            "mt-2 text-sm sm:text-base font-semibold text-gray-400";
+        }
+      });
+    }
+
+    function initials(name) {
+      return (name || "D")
+        .split(" ")
+        .filter(Boolean)
+        .map((n) => n[0])
+        .slice(0, 3)
+        .join("")
+        .toUpperCase();
+    }
+
+    function money(v) {
+      const amount = Number(v || 0);
+      return new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+        maximumFractionDigits: 0,
+      }).format(amount);
+    }
+
+    function displayTime24To12(time) {
+      if (!time) return "--";
+      const [hh, mm] = time.split(":");
+      const h = Number(hh);
+      const suffix = h >= 12 ? "PM" : "AM";
+      const hour12 = ((h + 11) % 12) + 1;
+      return `${hour12}:${mm} ${suffix}`;
+    }
+
+    function timeToApi(time) {
+      if (!time) return "";
+      if (time.includes("AM") || time.includes("PM")) {
+        const [t, suffix] = time.split(" ");
+        let [h, m] = t.split(":").map(Number);
+        if (suffix === "PM" && h !== 12) h += 12;
+        if (suffix === "AM" && h === 12) h = 0;
+        return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:00`;
+      }
+      if (time.length === 5) return `${time}:00`;
+      return time;
+    }
+
+    function formatDateForUI(dateStr) {
+      if (!dateStr) return "--";
+      const d = new Date(dateStr);
+      if (Number.isNaN(d.getTime())) return dateStr;
+      return d.toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+    }
+
+    function updateSummary() {
+      const doc = state.selectedDoctor;
+      if (!doc) return;
+
+      const doctorName = `Dr. ${doc.first_name} ${doc.last_name}`;
+      const specialty = doc.specialties || doc.specialty_name || "General";
+
+      el("selectedDoctorAvatar").textContent = initials(
+        `${doc.first_name} ${doc.last_name}`,
+      );
+      el("selectedDoctorName").textContent = doctorName;
+      el("selectedDoctorMeta").textContent =
+        `${specialty} • ${money(doc.consultation_fee)} per session`;
+
+      el("summaryDoctor").textContent = doctorName;
+      el("summaryType").textContent =
+        state.selectedType === "IN_PERSON"
+          ? "In-Person Visit"
+          : "Telemedicine";
+      el("summaryDate").textContent = state.selectedDate
+        ? formatDateForUI(state.selectedDate)
+        : "--";
+      el("summaryTime").textContent = state.selectedSlot
+        ? displayTime24To12(state.selectedSlot)
+        : "--";
+
+      el("detailsDoctor").textContent = doctorName;
+      el("detailsSpecialty").textContent = specialty;
+      el("detailsDateTime").textContent =
+        `${state.selectedDate ? formatDateForUI(state.selectedDate) : "--"} • ${state.selectedSlot ? displayTime24To12(state.selectedSlot) : "--"}`;
+      el("detailsType").textContent =
+        state.selectedType === "IN_PERSON"
+          ? "In-Person Visit"
+          : "Telemedicine";
+
+      state.consultationFee = Number(doc.consultation_fee || 0);
+      state.serviceCharge = 0;
+      state.totalAmount = state.consultationFee + state.serviceCharge;
+
+      el("consultationFee").textContent = money(state.consultationFee);
+      el("serviceCharge").textContent = money(state.serviceCharge);
+      el("totalAmount").textContent = money(state.totalAmount);
+
+      el("payConsultationFee").textContent = money(state.consultationFee);
+      el("payServiceCharge").textContent = money(state.serviceCharge);
+      el("payTotalAmount").textContent = money(state.totalAmount);
+    }
+
+    async function searchDoctors() {
+      hideMessage();
+
+      if (!token) {
+        showMessage("Please login first.", "error");
+        return;
+      }
+
+      const name = el("searchName").value.trim();
+      const specialty = el("searchSpecialty").value.trim();
+      const gender = el("searchGender").value.trim();
+      const hospitalId = el("searchHospitalId").value.trim();
+      const minFee = el("minFee").value.trim();
+      const maxFee = el("maxFee").value.trim();
+
+      const params = new URLSearchParams();
+      if (name) params.set("name", name);
+      if (specialty) params.set("specialty", specialty);
+      if (gender) params.set("gender", gender);
+      if (hospitalId) params.set("hospitalId", hospitalId);
+
+      el("doctorsContainer").innerHTML = `
+            <div class="bg-white rounded-3xl border border-gray-200 shadow-sm p-8 text-center text-gray-500">
+              Loading doctors...
+            </div>
+          `;
+
+      try {
+        const res = await fetch(
+          `/api/v1/patient/doctors?${params.toString()}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        const json = await res.json();
+        if (!res.ok)
+          throw new Error(json.message || "Failed to load doctors");
+
+        let doctors = json.data || [];
+
+        if (minFee)
+          doctors = doctors.filter(
+            (d) => Number(d.consultation_fee || 0) >= Number(minFee),
+          );
+        if (maxFee)
+          doctors = doctors.filter(
+            (d) => Number(d.consultation_fee || 0) <= Number(maxFee),
+          );
+
+        state.doctors = doctors;
+        state.filteredDoctors = doctors;
+
+        renderDoctors(doctors);
+
+        if (!doctors.length) {
+          showMessage("No doctors found for the selected filters.", "error");
+        }
+      } catch (err) {
+        el("doctorsContainer").innerHTML = `
+              <div class="bg-white rounded-3xl border border-gray-200 shadow-sm p-8 text-center text-red-600">
+                ${err.message || "Failed to load doctors"}
+              </div>
+            `;
+      }
+    }
+
+    function renderDoctors(doctors) {
+      if (!doctors.length) {
+        el("doctorsContainer").innerHTML = `
+              <div class="bg-white rounded-3xl border border-gray-200 shadow-sm p-8 text-center text-gray-500">
+                No doctors found.
+              </div>
+            `;
+        return;
+      }
+
+      el("doctorsContainer").innerHTML = doctors
+        .map((doctor) => {
+          const doctorName = `Dr. ${doctor.first_name} ${doctor.last_name}`;
+          const specialties =
+            doctor.specialties || doctor.specialty_name || "General";
+          const initialsText = initials(
+            `${doctor.first_name} ${doctor.last_name}`,
+          );
+          const rating = doctor.rating
+            ? Number(doctor.rating).toFixed(1)
+            : "4.8";
+
+          return `
+              <div class="bg-white rounded-3xl border border-gray-200 shadow-sm p-5 sm:p-6 card-hover">
+                <div class="flex flex-col lg:flex-row lg:items-start gap-5">
+                  <div class="w-18 h-18 min-w-[72px] min-h-[72px] rounded-full bg-primary text-white flex items-center justify-center text-xl font-bold shadow-sm">
+                    ${initialsText}
+                  </div>
+
+                  <div class="flex-1">
+                    <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                      <div>
+                        <h3 class="text-xl font-bold text-dark">${doctorName}</h3>
+                        <p class="text-gray-500">${specialties} • ${doctor.experience_years || 0} years experience</p>
+
+                        <div class="flex flex-wrap items-center gap-4 mt-3 text-sm">
+                          <div class="flex items-center gap-1">
+                            <span class="text-yellow-500">★</span>
+                            <span class="font-semibold text-dark">${rating}</span>
+                            <span class="text-gray-500">(${doctor.reviews_count || 0} reviews)</span>
+                          </div>
+
+                          <div class="text-gray-500">
+                            ${doctor.hospital_name || "Hospital"}
+                          </div>
+                        </div>
+
+                        <div class="mt-3 flex flex-wrap gap-2">
+                          ${(specialties || "")
+              .split(",")
+              .map(
+                (s) =>
+                  `<span class="px-2.5 py-1 rounded-full bg-primary-light text-primary text-xs font-semibold">${s.trim()}</span>`,
+              )
+              .join("")}
+                        </div>
+
+                        <div class="mt-4 text-sm">
+                          <span class="text-gray-500">Consultation Fee:</span>
+                          <span class="font-bold text-dark ml-1">${money(doctor.consultation_fee)}</span>
+                        </div>
+                      </div>
+
+                      <div class="flex shrink-0">
+                        <button type="button" class="selectDoctorBtn bg-primary hover:bg-primary-dark text-white px-5 py-3 rounded-2xl font-semibold transition"
+                          data-doctor='${encodeURIComponent(JSON.stringify(doctor))}'>
+                          Book Now
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `;
+        })
+        .join("");
+
+      document.querySelectorAll(".selectDoctorBtn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const doctor = JSON.parse(
+            decodeURIComponent(btn.getAttribute("data-doctor")),
+          );
+          selectDoctor(doctor);
+        });
+      });
+    }
+
+    function selectDoctor(doctor) {
+      state.selectedDoctor = doctor;
+      state.selectedDate = "";
+      state.selectedSlot = "";
+      state.selectedFile = null;
+      state.slots = [];
+
+      el("slotDate").value = "";
+      el("documentFile").value = "";
+      el("fileName").textContent = "No file selected";
+      el("chiefComplaint").value = "";
+      el("appointmentFor").value = "";
+      el("termsCheck").checked = false;
+
+      setStep(2);
+      updateSummary();
+      renderEmptySlots("Select a date to load time slots.");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function renderEmptySlots(message) {
+      el("slotsContainer").innerHTML = `
+            <div class="col-span-full text-sm text-gray-500 border border-dashed border-gray-200 rounded-2xl p-5 bg-white">
+              ${message}
+            </div>
+          `;
+    }
+
+    async function loadSlots() {
+      hideMessage();
+
+      if (!state.selectedDoctor) {
+        showMessage("Please select a doctor first.", "error");
+        return;
+      }
+
+      const date = el("slotDate").value;
+
+
+
+      if (!date) {
+        showMessage("Please select a date.", "error");
+        return;
+      }
+
+      state.selectedDate = date;
+      state.selectedSlot = "";
+      updateSummary();
+
+      renderEmptySlots("Loading slots...");
+
+      try {
+        const res = await fetch(
+          `/api/v1/appointments/slots?doctorId=${state.selectedDoctor.doctor_id}&date=${date}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+
+        const json = await res.json();
+        if (!res.ok) throw new Error(json.message || "Failed to load slots");
+
+        const rawSlots = json.data?.available_slots || json.data?.slots || [];
+        state.slots = rawSlots;
+
+        if (!rawSlots.length) {
+          renderEmptySlots(
+            json.data?.reason || "No slots available for selected date.",
+          );
+          return;
+        }
+
+        el("slotsContainer").innerHTML = rawSlots
+          .map((slot) => {
+            return `
+                <button type="button"
+                  class="slot-btn px-4 py-3 rounded-2xl border-2 border-gray-200 bg-white font-semibold text-dark hover:border-primary hover:bg-primary-light transition"
+                  data-slot="${slot}">
+                  ${displayTime24To12(slot)}
+                </button>
+              `;
+          })
+          .join("");
+
+        document.querySelectorAll(".slot-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            document
+              .querySelectorAll(".slot-btn")
+              .forEach((x) => x.classList.remove("selected"));
+
+            btn.classList.add("selected");
+
+            state.selectedSlot = btn.getAttribute("data-slot");
+
+            updateSummary();
+          });
+        });
+      } catch (err) {
+        renderEmptySlots(err.message || "Failed to load slots");
+      }
+    }
+
+    function bindTypeButtons() {
+      document.querySelectorAll(".type-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document
+            .querySelectorAll(".type-btn")
+            .forEach((x) => x.classList.remove("selected"));
+          btn.classList.add("selected");
+          state.selectedType = btn.getAttribute("data-type");
+          updateSummary();
+        });
+      });
+      const defaultBtn = document.querySelector(
+        '.type-btn[data-type="IN_PERSON"]',
+      );
+      if (defaultBtn) defaultBtn.classList.add("selected");
+    }
+
+    function bindPaymentMethodButtons() {
+      document
+        .querySelectorAll(".payment-method-btn")
+        .forEach((btn, index) => {
+          btn.addEventListener("click", () => {
+            document
+              .querySelectorAll(".payment-method-btn")
+              .forEach((x) =>
+                x.classList.remove("border-primary", "bg-primary-light"),
+              );
+            document
+              .querySelectorAll(".payment-method-btn")
+              .forEach((x) => x.classList.add("border-gray-200"));
+            btn.classList.add("border-primary", "bg-primary-light");
+            btn.classList.remove("border-gray-200");
+          });
+          if (index === 0)
+            btn.classList.add("border-primary", "bg-primary-light");
+        });
+    }
+
+    function goToPayment() {
+      const complaint = el("chiefComplaint").value.trim();
+      if (!complaint) {
+        showMessage(
+          "Please enter the chief complaint before continuing.",
+          "error",
+        );
+        return;
+      }
+
+      if (!el("termsCheck").checked) {
+        showMessage("Please accept the terms and conditions.", "error");
+        return;
+      }
+
+      updateSummary();
+      setStep(4);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    async function payAndConfirm() {
+      hideMessage();
+
+      if (!token) {
+        showMessage("Please login first.", "error");
+        return;
+      }
+
+      if (
+        !state.selectedDoctor ||
+        !state.selectedDate ||
+        !state.selectedSlot
+      ) {
+        showMessage(
+          "Please complete the appointment selection first.",
+          "error",
+        );
+        return;
+      }
+
+      const chiefComplaint = el("chiefComplaint").value.trim();
+      if (!chiefComplaint) {
+        showMessage("Chief complaint is required.", "error");
+        return;
+      }
+
+      if (!el("termsCheck").checked) {
+        showMessage("Please accept the terms and conditions.", "error");
+        return;
+      }
+
+      const appointmentFor = el("appointmentFor").value.trim();
+      const fileInput = el("documentFile");
+      const file =
+        fileInput.files && fileInput.files[0] ? fileInput.files[0] : null;
+
+      const payload = {
+        doctor_id: state.selectedDoctor.doctor_id,
+        slot_date: state.selectedDate,
+        start_time: timeToApi(state.selectedSlot),
+        appointment_type: state.selectedType,
+        chief_complaint: chiefComplaint,
+        appointment_for: appointmentFor || null,
+        amount: Number(state.selectedDoctor.consultation_fee || 0),
+        payment_method: "UPI"
+      };
+
+      el("payAndConfirmBtn").disabled = true;
+      el("payAndConfirmBtn").textContent = "Processing...";
+
+      try {
+        let response;
+        if (file) {
+          const formData = new FormData();
+          Object.entries(payload).forEach(([key, value]) => {
+            if (value !== null && value !== undefined)
+              formData.append(key, value);
+          });
+          formData.append("document", file);
+
+          response = await fetch("/api/v1/appointments", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            body: formData,
+          });
+
+
+        } else {
+          response = await fetch("/api/v1/appointments", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+          });
+        }
+
+        const json = await response.json();
+        if (!response.ok) throw new Error(json.message || "Booking failed");
+        console.log(json)
+        state.bookingResponse = json.data || json;
+        el("confNo").textContent =
+          state.bookingResponse.confirmation_no ||
+          state.bookingResponse.confirmation_no ||
+          "--";
+        el("confAppointmentId").textContent =
+          state.bookingResponse.appointment_id ||
+          state.bookingResponse.appointment_id ||
+          "--";
+        el("confDoctor").textContent =
+          `Dr. ${state.selectedDoctor.first_name} ${state.selectedDoctor.last_name}`;
+        el("confDateTime").textContent =
+          `${formatDateForUI(state.selectedDate)} • ${displayTime24To12(state.selectedSlot)}`;
+
+        setStep(5);
+        showMessage("Appointment booked successfully.", "success");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } catch (err) {
+        showMessage(err.message || "Failed to book appointment.", "error");
+      } finally {
+        el("payAndConfirmBtn").disabled = false;
+        el("payAndConfirmBtn").textContent = "Pay & Confirm Appointment";
+      }
+    }
+
+    function resetToSearch() {
+      state.selectedDoctor = null;
+      state.selectedDate = "";
+      state.selectedSlot = "";
+      state.selectedType = "IN_PERSON";
+      state.selectedFile = null;
+      state.bookingResponse = null;
+      setStep(1);
+      hideMessage();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function setDateLimits() {
+      const dateInput = el("slotDate");
+      const today = new Date();
+      const max = new Date();
+      max.setDate(today.getDate() + 60);
+
+      const minStr = today.toISOString().split("T")[0];
+      const maxStr = max.toISOString().split("T")[0];
+
+      dateInput.min = minStr;
+      dateInput.max = maxStr;
+    }
+
+    function initEvents() {
+      el("searchBtn").addEventListener("click", searchDoctors);
+      el("clearBtn").addEventListener("click", () => {
+        el("searchName").value = "";
+        el("searchSpecialty").value = "";
+        el("searchGender").value = "";
+        el("searchHospitalId").value = "";
+        el("minFee").value = "";
+        el("maxFee").value = "";
+        searchDoctors();
+      });
+
+      el("searchName").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") searchDoctors();
+      });
+
+      el("searchSpecialty").addEventListener("change", searchDoctors);
+      el("searchGender").addEventListener("change", searchDoctors);
+      el("searchHospitalId").addEventListener("change", searchDoctors);
+
+      el("backToSearchBtn").addEventListener("click", resetToSearch);
+      el("backToSlotsBtn").addEventListener("click", () => setStep(2));
+      el("backToDetailsBtn").addEventListener("click", () => setStep(3));
+
+      el("loadSlotsBtn").addEventListener("click", loadSlots);
+      el("slotDate").addEventListener("change", loadSlots);
+
+      el("goToDetailsBtn").addEventListener("click", () => {
+        if (!state.selectedSlot) {
+          showMessage("Please select a time slot.", "error");
+          return;
+        }
+
+        setStep(3);
+      });
+
+      el("goToPaymentBtn").addEventListener("click", goToPayment);
+      el("payAndConfirmBtn").addEventListener("click", payAndConfirm);
+
+      el("documentFile").addEventListener("change", (e) => {
+        const file =
+          e.target.files && e.target.files[0] ? e.target.files[0] : null;
+        el("fileName").textContent = file ? file.name : "No file selected";
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      setStep(1);
+      setDateLimits();
+      bindTypeButtons();
+      bindPaymentMethodButtons();
+      initEvents();
+
+      if (!token) {
+        showMessage("Login token not found. Please login again.", "error");
+        return;
+      }
+
+      await searchDoctors();
+    });
+  </script>
+  <%- include('../partials/footer') %>
+  <script src="/js/notification.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,52 @@
+<div id="tab-today" class="tab-panel hidden">
+
+  <!-- Header row -->
+  <div class="flex items-center justify-between mb-4">
+    <div>
+      <p class="text-base font-semibold text-gray-900" id="today-date-label"></p>
+      <p class="text-sm text-gray-500 mt-0.5" id="today-count-label"></p>
+    </div>
+
+    <div class="flex items-center gap-4">
+      <input
+        type="date"
+        id="today-date-input"
+        class="text-sm border border-gray-300 rounded-lg px-3 py-1.5 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+      />
+
+      <div class="hidden sm:flex items-center gap-4 text-xs text-gray-500">
+        <span class="flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-blue-400 inline-block"></span> Upcoming
+        </span>
+        <span class="flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-amber-400 inline-block"></span> In Progress
+        </span>
+        <span class="flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span> Completed
+        </span>
+        <span class="flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-red-400 inline-block"></span> No Show
+        </span>
+        <span class="flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-rose-400 inline-block"></span> Cancelled
+        </span>
+        <span class="flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-violet-400 inline-block"></span> Rescheduled
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Appointment cards (populated by today_schedule.js) -->
+  <div class="space-y-3" id="today-appointments-list"></div>
+
+  <!-- Empty state (shown by JS when list is empty) -->
+  <div id="today-empty-state" class="hidden py-16 flex flex-col items-center gap-3 text-gray-400">
+    <svg class="w-10 h-10" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round"
+        d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5" />
+    </svg>
+    <p class="text-sm">No appointments scheduled.</p>
+  </div>
+
+</div><!-- /tab-today -->

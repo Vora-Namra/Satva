@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Satva Staff Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+</head>
+<body class="bg-white font-sans">
+
+  <!-- Navbar -->
+    <div class="max-w-7xl mx-auto px-6 pt-7">
+ <%-include('../admin/navbar.ejs') %>
+ </div>
+
+  <!-- Main Content -->
+  <div class="max-w-7xl mx-auto px-6 pt-7">
+
+    <!-- Page Header -->
+    <h1 class="text-2xl font-medium text-gray-900 mb-1">Staff Dashboard</h1>
+    <p class="text-sm text-gray-500 mb-6">System overview and management</p>
+
+    <!-- stats -->
+
+   <%- include('../admin/stats.ejs') %>
+
+    <!-- Tabs -->
+   <%-include('tabs.ejs')%>
+
+    <!-- Search & Filter -->
+    <div class="flex items-center gap-3 mb-5">
+      <div class="flex-1 flex items-center gap-2 border border-gray-200 rounded-lg px-3 py-2">
+        <i class="ti ti-search text-gray-400 text-base"></i>
+        <input
+          id="search-input"
+          type="text"
+          placeholder="Search patients..."
+          class="flex-1 border-none outline-none text-sm text-gray-700 bg-transparent"
+        />
+      </div>
+      <button class="flex items-center gap-2 border border-gray-200 rounded-lg px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition">
+        <i class="ti ti-filter text-base"></i>
+        Filter
+      </button>
+      <button
+        id="refresh-btn"
+        onclick="loadPatients()"
+        class="flex items-center gap-2 border border-gray-200 rounded-lg px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
+      >
+        <i class="ti ti-refresh text-base"></i>
+        Refresh
+      </button>
+    </div>
+
+    <!-- Patient Table -->
+    <div class="border border-gray-200 rounded-xl overflow-hidden mb-8">
+      <table class="w-full text-sm border-collapse">
+        <thead>
+          <tr class="bg-gray-50">
+            <th class="text-left px-4 py-3 font-medium text-gray-900">Patient ID</th>
+            <th class="text-left px-4 py-3 font-medium text-gray-900">Name</th>
+            <th class="text-left px-4 py-3 font-medium text-gray-900">Age</th>
+            <th class="text-left px-4 py-3 font-medium text-gray-900">Last Visit</th>
+            <th class="text-left px-4 py-3 font-medium text-gray-900">Appointments</th>
+            <th class="text-left px-4 py-3 font-medium text-gray-900">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="patient-tbody">
+          <!-- Rows injected by JS -->
+        </tbody>
+      </table>
+
+      <!-- Loading state -->
+      <div id="loading-state" class="flex flex-col items-center justify-center py-16 gap-3">
+        <i class="ti ti-loader-2 text-3xl text-green-600 animate-spin"></i>
+        <p class="text-sm text-gray-500">Loading patients...</p>
+      </div>
+
+      <!-- Error state -->
+      <div id="error-state" class="hidden flex flex-col items-center justify-center py-16 gap-3">
+        <i class="ti ti-alert-circle text-3xl text-red-400"></i>
+        <p class="text-sm text-gray-700 font-medium">Failed to load patients</p>
+        <p id="error-message" class="text-xs text-gray-500"></p>
+        <button onclick="loadPatients()" class="mt-2 text-sm text-green-600 hover:underline">Try again</button>
+      </div>
+
+      <!-- Empty state -->
+      <div id="empty-state" class="hidden flex flex-col items-center justify-center py-16 gap-3">
+        <i class="ti ti-users-off text-3xl text-gray-300"></i>
+        <p class="text-sm text-gray-500">No patients found</p>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div id="pagination" class="hidden flex items-center justify-between mb-8">
+      <p id="pagination-info" class="text-sm text-gray-500"></p>
+      <div class="flex items-center gap-2">
+        <button id="prev-btn" onclick="changePage(-1)" class="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition">
+          <i class="ti ti-chevron-left"></i> Prev
+        </button>
+        <button id="next-btn" onclick="changePage(1)" class="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition">
+          Next <i class="ti ti-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // ─── CONFIG ───────────────────────────────────────────────────────────────
+    // Replace this with your actual API base URL
+    const API_BASE_URL = 'http://localhost:3333/api/v1/staff';
+
+
+    const PAGE_SIZE = 10;
+    let currentPage = 1;
+    let totalRecords = 0;
+    let searchTimeout = null;
+    let allPatients = [];
+
+    // Format ISO date → "May 28, 2026"
+    function formatDate(dateStr) {
+      if (!dateStr) return '—';
+      const d = new Date(dateStr);
+      return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    }
+
+    function showState(state) {
+      document.getElementById('loading-state').classList.add('hidden');
+      document.getElementById('error-state').classList.add('hidden');
+      document.getElementById('empty-state').classList.add('hidden');
+      document.getElementById('patient-tbody').innerHTML = '';
+      if (state) document.getElementById(state).classList.remove('hidden');
+    }
+
+   function renderRows(patients) {
+  const tbody = document.getElementById('patient-tbody');
+  tbody.innerHTML = patients.map(p => `
+    <tr class="border-t border-gray-200 hover:bg-gray-50 transition">
+      <td class="px-4 py-3.5 text-gray-500">PT-${String(p.patient_id).padStart(4, '0')}</td>
+      <td class="px-4 py-3.5 font-medium text-gray-900">${p.first_name ?? ''} ${p.last_name ?? ''}</td>
+      <td class="px-4 py-3.5 text-gray-700">${calculateAge(p.dob)}</td>
+      <td class="px-4 py-3.5 text-gray-700">${formatDate(p.updated_at)}</td>
+      <td class="px-4 py-3.5">
+        <span class="text-xs px-2 py-1 rounded-full ${p.is_insured ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}">
+          ${p.is_insured ? 'Insured' : 'Uninsured'}
+        </span>
+      </td>
+      <td class="px-4 py-3.5">
+        <a href="/staff/patients/${p.patient_id}" class="text-green-600 font-medium hover:underline">View Profile</a>
+      </td>
+    </tr>
+  `).join('');
+}
+
+  function switchTab(btn, tab) {
+  window.location.href = `/staff/${tab}`;
+}
+// Calculate age from dob
+function calculateAge(dob) {
+  if (!dob) return '—';
+  const diff = Date.now() - new Date(dob).getTime();
+  return Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
+}
+    function updatePagination() {
+      const start = (currentPage - 1) * PAGE_SIZE + 1;
+      const end = Math.min(currentPage * PAGE_SIZE, totalRecords);
+      document.getElementById('pagination-info').textContent =
+        `Showing ${start}–${end} of ${totalRecords} patients`;
+      document.getElementById('prev-btn').disabled = currentPage === 1;
+      document.getElementById('next-btn').disabled = currentPage * PAGE_SIZE >= totalRecords;
+      document.getElementById('pagination').classList.remove('hidden');
+    }
+
+    async function loadPatients() {
+      const search = document.getElementById('search-input').value.trim();
+      showState('loading-state');
+      document.getElementById('pagination').classList.add('hidden');
+
+      try {
+        const url = new URL(`${API_BASE_URL}/fetchpatients`);
+        url.searchParams.set('page', currentPage);
+        url.searchParams.set('limit', PAGE_SIZE);
+        if (search) url.searchParams.set('search', search);
+
+        const accessToken = localStorage.getItem('accessToken')
+        const res = await fetch(url.toString(), {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            // Uncomment and set your auth header if needed:
+            Authorization: `Bearer ${accessToken}`,
+          }
+        });
+console.log(url)
+        if (!res.ok) throw new Error(`Server error: ${res.status} ${res.statusText}`);
+
+        const json = await res.json();
+
+        // Support both { data: [], total: N } and a plain array response
+        const patients = Array.isArray(json) ? json : (json.data ?? []);
+        totalRecords = json.total ?? patients.length;
+
+        // Update Active Patients stat card
+        document.getElementById('stat-patients').textContent = totalRecords.toLocaleString();
+
+        if (patients.length === 0) {
+          showState('empty-state');
+          return;
+        }
+
+        showState(null);
+        renderRows(patients);
+        updatePagination();
+
+      } catch (err) {
+        showState('error-state');
+        document.getElementById('error-message').textContent = err.message;
+        console.error('Failed to fetch patients:', err);
+      }
+    }
+
+    function changePage(delta) {
+      currentPage += delta;
+      loadPatients();
+    }
+
+    // Debounced search
+    document.getElementById('search-input').addEventListener('input', () => {
+      clearTimeout(searchTimeout);
+      currentPage = 1;
+      searchTimeout = setTimeout(loadPatients, 400);
+    });
+
+    // Initial load
+    loadPatients();
+  </script>
+<script src="/js/staffstats.js"></script>
+<script src="/js/stafftabs.js"></script>
+</body>
+</html>

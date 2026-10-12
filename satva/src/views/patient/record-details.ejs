@@ -1,0 +1,449 @@
+      <!DOCTYPE html>
+      <html lang="en">
+        <head>
+          <meta charset="UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+          <title>Satva - Medical Record Details</title>
+
+          <script src="https://cdn.tailwindcss.com"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+          <script type="module">
+            import { checkJwt } from "/js/check-jwt.js";
+
+            checkJwt();
+          </script>
+          <script>
+            tailwind.config = {
+              theme: {
+                extend: {
+                  colors: {
+                    primary: "#10A37F",
+                    "primary-dark": "#0d8a6a",
+                    "primary-light": "#e6f7f3",
+                    "bg-page": "#f0faf6",
+                    dark: "#0f1923",
+                  },
+                  fontFamily: {
+                    sans: ["DM Sans", "sans-serif"],
+                    display: ["Playfair Display", "serif"],
+                  },
+                },
+              },
+            };
+          </script>
+          <link
+            href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap"
+            rel="stylesheet"
+          />
+        </head>
+
+        <body class="bg-bg-page min-h-screen">
+          <!-- HEADER -->
+
+          <%- include('../partials/patient-header', { title: 'record-details' }) %>
+
+
+          <main class="max-w-5xl mx-auto px-6 py-10">
+            <a
+              href="/patient/records"
+              id="backToSearchBtn"
+              class="inline-flex items-center gap-2 text-gray-500 hover:text-dark mb-6"
+            >
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M15 19l-7-7 7-7"
+                ></path>
+              </svg>
+              Back to Records Page
+            </a>
+            <div id="recordContainer" class="bg-white rounded-3xl shadow-sm p-8">
+              <div class="text-center py-10">Loading Medical Record...</div>
+            </div>
+            <div
+              id="summaryModal"
+              class="hidden fixed inset-0 bg-black/50 z-50"
+            >
+              <div
+                class="bg-white max-w-3xl mx-auto mt-20 rounded-xl p-6"
+              >
+                <div class="flex justify-between mb-4">
+                  <h2 class="text-xl font-bold">
+                    AI Medical Summary
+                  </h2>
+
+                  <button onclick="closeSummary()">
+                    ✕
+                  </button>
+                </div>
+
+              <div
+                id="summaryContent"
+                class="flex-1 overflow-y-auto border rounded-lg p-4 bg-gray-50"
+              ></div>
+              </div>
+            </div>
+          </main>
+
+          <%- include('../partials/footer') %>
+
+          <script>
+      let medicalRecordData = null;
+      const token = localStorage.getItem("accessToken");
+
+            const recordId = "<%= recordId %>";
+
+            async function loadRecord() {
+              try {
+                const response = await fetch(`/api/v1/patient/records/${recordId}`, {
+                  method: "GET",
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                  },
+                });
+
+                const result = await response.json();
+
+                const record = result.data;
+                medicalRecordData = record;
+                console.log(record)
+                const doc_name = `${record.doctor_first_name} ${record.doctor_last_name}`;
+
+                const container = document.getElementById("recordContainer");
+
+                container.innerHTML = `
+                                              <div class="flex items-center justify-between mb-8">
+
+                                                  <div>
+                                                      <h1 class="font-display text-4xl text-dark">
+                                                      Medical Record Details
+                                                      </h1>
+
+                                                      <p class="text-gray-500 mt-2">
+                                                      Record ID : ${record.record_id}
+                                                      </p>
+                                                  </div>
+
+                                                  <button
+                                                      onclick='downloadRecord(${record.record_id})'
+                                                      class="bg-primary text-white px-5 py-3 rounded-xl hover:bg-primary-dark"
+                                                  >
+                                                      Download Record
+                                                  </button>
+                                                  <button
+                                                    id="aiSummaryBtn"
+                                                    onclick="generateSummary(<%= recordId %>)"
+                                                    class="bg-blue-600 text-white px-5 py-3 rounded-xl"
+                                                  >
+                                                    AI Summary
+                                                  </button>
+                                                  </div>
+
+
+                                                  <div class="grid md:grid-cols-3 gap-5">
+
+                                                  <div class="bg-primary-light rounded-xl p-5">
+                                                      <p class="text-sm text-gray-500">
+                                                      Doctor
+                                                      </p>
+
+                                                      <h3 class="font-semibold text-lg mt-1">
+                                                      Dr. ${record.doctor_first_name || "Unknown"}
+                                                      ${record.doctor_last_name || ""}
+                                                      </h3>
+                                                  </div>
+
+                                                  <div class="bg-primary-light rounded-xl p-5">
+                                                      <p class="text-sm text-gray-500">
+                                                      Appointment Type
+                                                      </p>
+
+                                                      <h3 class="font-semibold text-lg mt-1">
+                                                      ${record.appointment_type || "N/A"}
+                                                      </h3>
+                                                  </div>
+
+                                                  <div class="bg-primary-light rounded-xl p-5">
+                                                      <p class="text-sm text-gray-500">
+                                                      Appointment Date
+                                                      </p>
+
+                                                      <h3 class="font-semibold text-lg mt-1">
+                                                      ${
+                                                        record.slot_date
+                                                          ? record.slot_date.split(
+                                                              "T",
+                                                            )[0]
+                                                          : "N/A"
+                                                      }
+                                                      </h3>
+                                                  </div>
+
+                                                  </div>
+
+
+                                                  <div class="mt-8">
+
+                                                  <h3 class="text-xl font-semibold mb-3">
+                                                      Diagnosis
+                                                  </h3>
+
+                                                  <div class="bg-gray-50 rounded-xl p-5 border">
+                                                      ${
+                                                        record.diagnosis ||
+                                                        "No diagnosis provided by doctor."
+                                                      }
+                                                  </div>
+
+                                                  </div>
+
+
+                                                  <div class="mt-8">
+
+                                                  <h3 class="text-xl font-semibold mb-3">
+                                                      Examination Notes
+                                                  </h3>
+
+                                                  <div class="bg-gray-50 rounded-xl p-5 border ">
+                                                      ${
+                                                        record.examination_notes ||
+                                                        "No examination notes available."
+                                                      }
+                                                  </div>
+
+                                                  </div>
+
+
+                                                  <div class="mt-8">
+
+                                                  <h3 class="text-xl font-semibold mb-3">
+                                                      Prescription
+                                                  </h3>
+
+                                                  <div class="bg-gray-50 rounded-xl p-5 border">
+
+                                                      ${
+                                                        record.prescription_id
+                                                          ? `
+                                                      <p class="font-medium mb-3">
+                                                          Prescription #${record.prescription_id}
+                                                      </p>
+
+                                                      <p>
+                                                          ${record.prescription_notes || "No notes provided"}
+                                                      </p>
+                                                      `
+                                                          : `
+                                                      <p class="text-gray-500">
+                                                          No prescription has been issued.
+                                                      </p>
+                                                      `
+                                                      }
+
+                                                  </div>
+
+                                                  </div>
+
+
+                                                  <div class="mt-8">
+
+                                                  <h3 class="text-xl font-semibold mb-3">
+                                                      Medicines
+                                                  </h3>
+
+                                                  <div class="bg-gray-50 rounded-xl p-5 border">
+
+                                                      ${
+                                                        record.medicines?.length
+                                                          ? `
+                                                      <ul class="space-y-2">
+                                                      ${record.medicines
+                                                        .map(
+                                                          (medicine) => `
+                                                          <li class="border-b pb-2">
+                                                              ${medicine.name}
+                                                          </li>
+                                                          `,
+                                                        )
+                                                        .join("")}
+                                                      </ul>
+                                                      `
+                                                          : `
+                                                      <p class="text-gray-500">
+                                                          No medicines prescribed.
+                                                      </p>
+                                                      `
+                                                      }
+
+                                                  </div>
+
+                                                  </div>
+
+
+                                                  <div class="mt-8">
+
+                                                  <h3 class="text-xl font-semibold mb-3">
+                                                      Record Information
+                                                  </h3>
+
+                                                  <div class="grid md:grid-cols-2 gap-4">
+
+                                                      <div class="border rounded-xl p-5">
+                                                      <p class="text-sm text-gray-500">
+                                                          Appointment ID
+                                                      </p>
+
+                                                      <p class="font-medium mt-1">
+                                                          ${record.appointment_id}
+                                                      </p>
+                                                      </div>
+
+                                                      <div class="border rounded-xl p-5">
+                                                      <p class="text-sm text-gray-500">
+                                                          Record Date
+                                                      </p>
+
+                                                      <p class="font-medium mt-1">
+                                                          ${
+                                                            record.created_at
+                                                              ? record.created_at.split(
+                                                                  "T",
+                                                                )[0]
+                                                              : "N/A"
+                                                          }
+                                                      </p>
+                                                      </div>
+
+                                                  </div>
+
+                                              </div>`;
+
+                // Check if summary exists in local storage and update button state
+                const aiSummaryBtn = document.getElementById("aiSummaryBtn");
+                const summaryKey = `record_summary_${record.record_id}`;
+                const cachedSummary = localStorage.getItem(summaryKey);
+
+                if (cachedSummary && aiSummaryBtn) {
+                  aiSummaryBtn.disabled = true;
+                  aiSummaryBtn.innerText = "Summary Generated";
+                  aiSummaryBtn.classList.add("opacity-50", "cursor-not-allowed");
+                }
+              } catch (error) {
+                console.error(error);
+              }
+            }
+
+            loadRecord();
+            async function generateSummary(recordId) {
+              const summaryKey = `record_summary_${recordId}`;
+              const modal = document.getElementById("summaryModal");
+              const content = document.getElementById("summaryContent");
+              const button = document.getElementById("aiSummaryBtn");
+
+              modal.classList.remove("hidden");
+
+              const cachedSummary = localStorage.getItem(summaryKey);
+              if (cachedSummary) {
+                content.innerHTML = formatSummary(cachedSummary);
+                button.disabled = true;
+                button.innerText = "Summary Generated";
+                button.classList.add("opacity-50", "cursor-not-allowed");
+                return;
+              }
+
+              content.innerHTML = `
+                <div class="flex justify-center py-10">
+                  <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                </div>
+                <p class="text-center text-gray-500">Generating AI Summary...</p>
+              `;
+
+              try {
+                const token = localStorage.getItem("accessToken");
+
+                const response = await fetch(`/api/v1/patient/records/${recordId}/summary`, {
+                  headers: { Authorization: `Bearer ${token}` },
+                });
+
+                const result = await response.json();
+
+                localStorage.setItem(summaryKey, result.data);
+
+                content.innerHTML = formatSummary(result.data);
+
+                button.disabled = true;
+                button.innerText = "Summary Generated";
+                button.classList.add("opacity-50", "cursor-not-allowed");
+              } catch (error) {
+                content.innerHTML = `
+                  <div class="text-center text-red-500 py-6">
+                    Failed to generate AI summary.
+                  </div>
+                `;
+              }
+            }
+
+            function formatSummary(text) {
+              if (!text) return "";
+
+              let html = text;
+
+              html = html.replace(
+                /^# (.*)$/gm,
+                `<h2 class="text-xl font-bold text-primary mt-6 mb-3">$1</h2>`
+              );
+
+              html = html.replace(
+                /^\* (.*)$/gm,
+                `<li class="ml-5 list-disc">$1</li>`
+              );
+
+              html = html.replace(
+                /^- (.*)$/gm,
+                `<li class="ml-5 list-disc">$1</li>`
+              );
+
+              html = html.replace(/\n/g, "<br>");
+
+              return `
+                <div class="text-gray-700 leading-7 text-sm max-h-[500px] overflow-y-auto pr-3">
+                  ${html}
+                </div>
+              `;
+            }
+            function closeSummary() {
+              document
+                .getElementById("summaryModal")
+                .classList.add("hidden");
+            }
+
+
+          </script>
+          <script type="module">
+            import { downloadMedicalRecord } from "/js/download-record.js";
+
+            window.downloadRecord = async function (recordId) {
+              const token = localStorage.getItem("accessToken");
+
+              const response = await fetch(`/api/v1/patient/records/${recordId}`, {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              });
+
+              const result = await response.json();
+
+              await downloadMedicalRecord(result.data);
+            };
+          </script>
+        </body>
+      </html>

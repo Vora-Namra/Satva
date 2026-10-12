@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Patient Profile — Satva Staff</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+</head>
+<body class="bg-gray-50 font-sans">
+
+  <!-- Navbar -->
+<div class="max-w-7xl mx-auto px-6 pt-7">
+ <%- include('../admin/navbar.ejs') %>
+ </div>
+
+  <div class="max-w-5xl mx-auto px-6 py-8">
+
+    <!-- Back -->
+    <button onclick="window.history.back()"
+      class="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 transition mb-6">
+      <i class="ti ti-arrow-left text-base"></i>
+      Back to Patients
+    </button>
+
+    <!-- Loading -->
+    <div id="loading-state" class="flex flex-col items-center justify-center py-24 gap-3">
+      <i class="ti ti-loader-2 text-3xl text-green-600 animate-spin"></i>
+      <p class="text-sm text-gray-500">Loading patient profile...</p>
+    </div>
+
+    <!-- Error -->
+    <div id="error-state" class="hidden flex flex-col items-center justify-center py-24 gap-3">
+      <i class="ti ti-alert-circle text-3xl text-red-400"></i>
+      <p class="text-sm font-medium text-gray-700">Failed to load patient</p>
+      <p id="error-msg" class="text-xs text-gray-400"></p>
+      <button onclick="loadPatient()" class="mt-2 text-sm text-green-600 hover:underline">Try again</button>
+    </div>
+
+    <!-- Profile -->
+    <div id="profile-card" class="hidden space-y-5">
+
+      <!-- Top card -->
+      <div class="bg-white border border-gray-200 rounded-xl p-6 flex items-center gap-5">
+        <!-- Avatar -->
+        <div id="avatar"
+          class="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center text-green-700 text-xl font-semibold shrink-0">
+        </div>
+
+        <div class="flex-1 min-w-0">
+          <h1 id="patient-name" class="text-xl font-semibold text-gray-900"></h1>
+          <div class="flex items-center gap-2 mt-1.5 flex-wrap">
+            <span id="patient-id-badge"
+              class="text-xs font-medium bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full"></span>
+            <span id="gender-badge"
+              class="text-xs font-medium px-2.5 py-1 rounded-full"></span>
+            <span id="blood-badge"
+              class="text-xs font-medium bg-red-50 text-red-600 border border-red-200 px-2.5 py-1 rounded-full hidden"></span>
+          </div>
+        </div>
+
+        <span id="insurance-badge"
+          class="shrink-0 text-xs font-medium px-3 py-1.5 rounded-full border"></span>
+      </div>
+
+      <!-- Info Grid -->
+      <div class="grid grid-cols-2 gap-5">
+
+        <!-- Personal Info -->
+        <div class="bg-white border border-gray-200 rounded-xl p-5">
+          <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">
+            Personal Information
+          </p>
+          <div class="space-y-3.5 text-sm">
+
+            <div class="flex items-center gap-3">
+              <i class="ti ti-cake text-gray-400 text-base w-5 shrink-0"></i>
+              <span class="text-gray-500 w-32 shrink-0">Date of Birth</span>
+              <span id="v-dob" class="text-gray-900 font-medium"></span>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <i class="ti ti-user text-gray-400 text-base w-5 shrink-0"></i>
+              <span class="text-gray-500 w-32 shrink-0">Age</span>
+              <span id="v-age" class="text-gray-900 font-medium"></span>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <i class="ti ti-gender-bigender text-gray-400 text-base w-5 shrink-0"></i>
+              <span class="text-gray-500 w-32 shrink-0">Gender</span>
+              <span id="v-gender" class="text-gray-900 font-medium capitalize"></span>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <i class="ti ti-droplet text-gray-400 text-base w-5 shrink-0"></i>
+              <span class="text-gray-500 w-32 shrink-0">Blood Group</span>
+              <span id="v-blood" class="text-gray-900 font-medium"></span>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <i class="ti ti-shield-check text-gray-400 text-base w-5 shrink-0"></i>
+              <span class="text-gray-500 w-32 shrink-0">Insured</span>
+              <span id="v-insured" class="font-medium"></span>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Contact Info -->
+        <div class="bg-white border border-gray-200 rounded-xl p-5">
+          <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">
+            Contact Information
+          </p>
+          <div class="space-y-3.5 text-sm">
+
+            <div class="flex items-center gap-3">
+              <i class="ti ti-phone text-gray-400 text-base w-5 shrink-0"></i>
+              <span class="text-gray-500 w-32 shrink-0">Mobile</span>
+              <span id="v-mobile" class="text-gray-900 font-medium"></span>
+            </div>
+
+            <div class="flex items-start gap-3">
+              <i class="ti ti-map-pin text-gray-400 text-base w-5 shrink-0 mt-0.5"></i>
+              <span class="text-gray-500 w-32 shrink-0">Address</span>
+              <span id="v-address" class="text-gray-900 font-medium leading-relaxed"></span>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <i class="ti ti-id-badge text-gray-400 text-base w-5 shrink-0"></i>
+              <span class="text-gray-500 w-32 shrink-0">Patient ID</span>
+              <span id="v-patient-id" class="text-gray-900 font-medium font-mono"></span>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <i class="ti ti-calendar-plus text-gray-400 text-base w-5 shrink-0"></i>
+              <span class="text-gray-500 w-32 shrink-0">Registered</span>
+              <span id="v-created" class="text-gray-900 font-medium"></span>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <i class="ti ti-refresh text-gray-400 text-base w-5 shrink-0"></i>
+              <span class="text-gray-500 w-32 shrink-0">Last Updated</span>
+              <span id="v-updated" class="text-gray-900 font-medium"></span>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Quick Stats Row -->
+      <div class="grid grid-cols-3 gap-5">
+
+        <div class="bg-white border border-gray-200 rounded-xl p-5 flex items-center gap-4">
+          <div class="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center shrink-0">
+            <i class="ti ti-calendar text-green-600 text-lg"></i>
+          </div>
+          <div>
+            <p class="text-xs text-gray-400 mb-0.5">Total Appointments</p>
+            <p id="v-total-appointments" class="text-xl font-bold text-gray-900">—</p>
+          </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-xl p-5 flex items-center gap-4">
+          <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+            <i class="ti ti-clock text-blue-500 text-lg"></i>
+          </div>
+          <div>
+            <p class="text-xs text-gray-400 mb-0.5">Last Visit</p>
+            <p id="v-last-visit" class="text-sm font-semibold text-gray-900">—</p>
+          </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-xl p-5 flex items-center gap-4">
+          <div class="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center shrink-0">
+            <i class="ti ti-file-text text-purple-500 text-lg"></i>
+          </div>
+          <div>
+            <p class="text-xs text-gray-400 mb-0.5">Medical Records</p>
+            <p id="v-records" class="text-xl font-bold text-gray-900">—</p>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // ─── CONFIG ──────────────────────────────────────────────────────
+    const API_BASE = 'http://localhost:3333/api/v1/staff';
+
+    let patientData = null;
+
+    // ─── HELPERS ─────────────────────────────────────────────────────
+    function getToken() {
+      return localStorage.getItem('accessToken') ?? '';
+    }
+
+    function getPatientId() {
+      // URL: /staff/patient/:patientId
+      const parts = window.location.pathname.split('/');
+      return parts[parts.length - 1];
+    }
+
+    function initials(firstName, lastName) {
+      const f = firstName?.[0] ?? '';
+      const l = lastName?.[0]  ?? '';
+      return (f + l).toUpperCase() || '?';
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '—';
+      return new Date(dateStr).toLocaleDateString('en-US', {
+        year: 'numeric', month: 'long', day: 'numeric'
+      });
+    }
+
+    function calculateAge(dob) {
+      if (!dob) return '—';
+      const diff = Date.now() - new Date(dob).getTime();
+      return `${Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25))} years`;
+    }
+
+    // ─── POPULATE ────────────────────────────────────────────────────
+    function populateView(p) {
+      // Avatar
+      document.getElementById('avatar').textContent =
+        initials(p.first_name, p.last_name);
+
+      // Name
+      document.getElementById('patient-name').textContent =
+        `${p.first_name ?? ''} ${p.last_name ?? ''}`.trim() || '—';
+
+      // Patient ID badge
+      document.getElementById('patient-id-badge').textContent =
+        `PT-${String(p.patient_id).padStart(4, '0')}`;
+
+      // Gender badge
+      const genderBadge = document.getElementById('gender-badge');
+      genderBadge.textContent = p.gender ?? '—';
+      genderBadge.className   = `text-xs font-medium px-2.5 py-1 rounded-full ${
+        p.gender === 'FEMALE' ? 'bg-pink-50 text-pink-600 border border-pink-200'
+        : p.gender === 'MALE' ? 'bg-blue-50 text-blue-600 border border-blue-200'
+        : 'bg-gray-100 text-gray-600 border border-gray-200'
+      }`;
+
+      // Blood group badge
+      if (p.blood_group) {
+        const bloodBadge = document.getElementById('blood-badge');
+        bloodBadge.textContent = p.blood_group;
+        bloodBadge.classList.remove('hidden');
+      }
+
+      // Insurance badge
+      const insBadge    = document.getElementById('insurance-badge');
+      const isInsured   = p.is_insured == 1 || p.is_insured === true;
+      insBadge.textContent = isInsured ? 'Insured' : 'Uninsured';
+      insBadge.className   = `shrink-0 text-xs font-medium px-3 py-1.5 rounded-full border ${
+        isInsured
+          ? 'bg-green-50 text-green-700 border-green-200'
+          : 'bg-gray-100 text-gray-500 border-gray-200'
+      }`;
+
+      // Personal info
+      document.getElementById('v-dob').textContent     = formatDate(p.dob);
+      document.getElementById('v-age').textContent     = calculateAge(p.dob);
+      document.getElementById('v-gender').textContent  = p.gender ?? '—';
+      document.getElementById('v-blood').textContent   = p.blood_group ?? '—';
+
+      const insuredEl = document.getElementById('v-insured');
+      insuredEl.textContent  = isInsured ? 'Yes' : 'No';
+      insuredEl.className    = `font-medium ${isInsured ? 'text-green-600' : 'text-gray-500'}`;
+
+      // Contact info
+      document.getElementById('v-mobile').textContent =
+        p.mobile ? `${p.country_code ?? ''} ${p.mobile}`.trim() : '—';
+
+      const address = [p.address_line1, p.address_line2].filter(Boolean).join(', ');
+      document.getElementById('v-address').textContent  = address || '—';
+      document.getElementById('v-patient-id').textContent =
+        `PT-${String(p.patient_id).padStart(4, '0')}`;
+      document.getElementById('v-created').textContent  = formatDate(p.created_at);
+      document.getElementById('v-updated').textContent  = formatDate(p.updated_at);
+    }
+
+    // ─── LOAD PATIENT ────────────────────────────────────────────────
+    async function loadPatient() {
+      const patientId = getPatientId();
+
+      document.getElementById('loading-state').classList.remove('hidden');
+      document.getElementById('error-state').classList.add('hidden');
+      document.getElementById('profile-card').classList.add('hidden');
+
+      try {
+        const res = await fetch(`${API_BASE}/patients/${patientId}`, {
+          headers: {
+            'Content-Type':  'application/json',
+            'Authorization': `Bearer ${getToken()}`,
+          }
+        });
+
+        if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+
+        const json = await res.json();
+
+        // Your API returns data as array → take first element
+        const raw = json.data ?? json;
+        patientData  = Array.isArray(raw) ? raw[0] : raw;
+
+        if (!patientData) throw new Error('Patient not found');
+
+        console.log('patient data:', patientData);
+
+        populateView(patientData);
+
+        document.getElementById('loading-state').classList.add('hidden');
+        document.getElementById('profile-card').classList.remove('hidden');
+
+      } catch (err) {
+        document.getElementById('loading-state').classList.add('hidden');
+        document.getElementById('error-state').classList.remove('hidden');
+        document.getElementById('error-msg').textContent = err.message;
+        console.error(err);
+      }
+    }
+
+    loadPatient();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Settings — Satva Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+</head>
+<body class="bg-white font-sans">
+
+  <!-- Navbar -->
+   <div class="max-w-7xl mx-auto px-6 pt-7">
+ <%- include('navbar.ejs') %>
+ </div>
+
+  <div class="max-w-7xl mx-auto px-6 pt-7">
+
+    <!-- Page Header -->
+    <h1 class="text-2xl font-bold text-gray-900 mb-1">Admin Dashboard</h1>
+    <p class="text-sm text-gray-500 mb-6">System overview and management</p>
+
+    <!-- Stat Cards -->
+   <%- include('stats.ejs') %>
+
+    <!-- Tabs -->
+   <%-include('tabs.ejs')%>
+
+    <!-- Loading -->
+    <div id="loading-state" class="flex flex-col items-center justify-center py-24 gap-3">
+      <i class="ti ti-loader-2 text-3xl text-green-600 animate-spin"></i>
+      <p class="text-sm text-gray-500">Loading hospital settings...</p>
+    </div>
+
+    <!-- Error -->
+    <div id="error-state" class="hidden flex flex-col items-center justify-center py-24 gap-3">
+      <i class="ti ti-alert-circle text-3xl text-red-400"></i>
+      <p class="text-sm font-medium text-gray-700">Failed to load settings</p>
+      <p id="error-msg" class="text-xs text-gray-400"></p>
+      <button onclick="loadSettings()" class="mt-2 text-sm text-green-600 hover:underline">Try again</button>
+    </div>
+
+    <!-- Hospital Settings Card -->
+    <div id="settings-card" class="hidden mb-8">
+      <div class="border border-gray-200 rounded-xl p-8">
+
+        <!-- Card Header -->
+        <div class="flex items-center justify-between mb-6 pb-4 border-b border-gray-100">
+          <div>
+            <h2 class="text-base font-semibold text-gray-900">Hospital Settings</h2>
+            <p class="text-xs text-gray-400 mt-0.5">Manage your hospital profile and contact details</p>
+          </div>
+          <span id="hospital-id-badge"
+            class="text-xs font-medium bg-green-50 text-green-700 border border-green-200 px-3 py-1 rounded-full">
+          </span>
+        </div>
+
+        <!-- Form Grid -->
+        <div class="grid grid-cols-2 gap-6">
+
+          <!-- Hospital Name -->
+          <div class="flex flex-col gap-1.5">
+            <label class="text-sm font-medium text-gray-700">Hospital Name</label>
+            <input
+              id="f-name"
+              type="text"
+              class="border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition"
+            />
+          </div>
+
+          <!-- Contact Email -->
+          <div class="flex flex-col gap-1.5">
+            <label class="text-sm font-medium text-gray-700">Contact Email</label>
+            <input
+              id="f-email"
+              type="email"
+              class="border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition"
+            />
+          </div>
+
+          <!-- Contact Number -->
+          <div class="flex flex-col gap-1.5">
+            <label class="text-sm font-medium text-gray-700">Contact Phone</label>
+            <input
+              id="f-phone"
+              type="text"
+              class="border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition"
+            />
+          </div>
+
+          <!-- Registered Since -->
+          <div class="flex flex-col gap-1.5">
+            <label class="text-sm font-medium text-gray-700">Registered Since</label>
+            <input
+              id="f-created"
+              type="text"
+              disabled
+              class="border border-gray-100 rounded-lg px-4 py-2.5 text-sm text-gray-400 bg-gray-50 outline-none cursor-not-allowed"
+            />
+          </div>
+
+          <!-- Address Line 1 -->
+          <div class="flex flex-col gap-1.5">
+            <label class="text-sm font-medium text-gray-700">Address Line 1</label>
+            <input
+              id="f-address1"
+              type="text"
+              class="border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition"
+            />
+          </div>
+
+          <!-- Address Line 2 -->
+          <div class="flex flex-col gap-1.5">
+            <label class="text-sm font-medium text-gray-700">
+              Address Line 2
+              <span class="text-gray-400 font-normal ml-1">(optional)</span>
+            </label>
+            <input
+              id="f-address2"
+              type="text"
+              placeholder="Suite, Floor, Landmark..."
+              class="border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-900 outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition placeholder-gray-300"
+            />
+          </div>
+
+        </div>
+
+        <!-- Save Button + feedback -->
+        <div class="flex items-center gap-4 mt-8 pt-5 border-t border-gray-100">
+          <button
+            id="save-btn"
+            onclick="saveSettings()"
+            class="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-6 py-2.5 rounded-lg transition"
+          >
+            <i class="ti ti-device-floppy text-base"></i>
+            Save Settings
+          </button>
+          <button
+            onclick="resetForm()"
+            class="text-sm text-gray-500 border border-gray-200 px-5 py-2.5 rounded-lg hover:bg-gray-50 transition"
+          >
+            Reset
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:3333/api/v1/admin';
+    let hospitalData = null;
+
+  
+
+    // ─── HELPERS ─────────────────────────────────────
+    function getToken() {
+      return localStorage.getItem('accessToken') ?? '';
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '—';
+      return new Date(dateStr).toLocaleDateString('en-US', {
+        year: 'numeric', month: 'long', day: 'numeric'
+      });
+    }
+
+    // ─── POPULATE FORM ───────────────────────────────
+    function populateForm(h) {
+      document.getElementById('hospital-id-badge').textContent =
+        `Hospital ID: ${h.hospital_id}`;
+      document.getElementById('f-name').value     = h.hospital_name    ?? '';
+      document.getElementById('f-email').value    = h.email            ?? '';
+      document.getElementById('f-phone').value    = h.contact_number   ?? '';
+      document.getElementById('f-address1').value = h.address_line1    ?? '';
+      document.getElementById('f-address2').value = h.address_line2    ?? '';
+      document.getElementById('f-created').value  = formatDate(h.created_at);
+    }
+
+    function resetForm() {
+      if (hospitalData) populateForm(hospitalData);
+    }
+
+    // ─── LOAD ────────────────────────────────────────
+    async function loadSettings() {
+      document.getElementById('loading-state').classList.remove('hidden');
+      document.getElementById('error-state').classList.add('hidden');
+      document.getElementById('settings-card').classList.add('hidden');
+
+      try {
+        const res = await fetch(`${API_BASE}/hospital`, {
+          headers: {
+            'Content-Type':  'application/json',
+            'Authorization': `Bearer ${getToken()}`,
+          }
+        });
+
+        if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+
+        const json = await res.json();
+
+        // handles { data: [{...}] } or { data: {...} }
+        const raw   = json.data ?? json;
+        hospitalData = Array.isArray(raw) ? raw[0] : raw;
+
+        if (!hospitalData) throw new Error('No hospital data found');
+
+        populateForm(hospitalData);
+
+        document.getElementById('loading-state').classList.add('hidden');
+        document.getElementById('settings-card').classList.remove('hidden');
+
+      } catch (err) {
+        document.getElementById('loading-state').classList.add('hidden');
+        document.getElementById('error-state').classList.remove('hidden');
+        document.getElementById('error-msg').textContent = err.message;
+        console.error(err);
+      }
+    }
+
+    // ─── SAVE ────────────────────────────────────────
+    async function saveSettings() {
+      const saveBtn    = document.getElementById('save-btn');
+
+      saveBtn.disabled  = true;
+      saveBtn.innerHTML = '<i class="ti ti-loader-2 animate-spin text-base"></i> Saving...';
+
+      const payload = {
+        hospital_name:   document.getElementById('f-name').value.trim(),
+        email:           document.getElementById('f-email').value.trim(),
+        contact_number:  document.getElementById('f-phone').value.trim(),
+        address_line1:   document.getElementById('f-address1').value.trim(),
+        address_line2:   document.getElementById('f-address2').value.trim() || null,
+      };
+
+      try {
+        const res = await fetch(`${API_BASE}/hospital`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type':  'application/json',
+            'Authorization': `Bearer ${getToken()}`,
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+          const errJson = await res.json().catch(() => ({}));
+          throw new Error(errJson.message ?? `${res.status} ${res.statusText}`);
+        }
+
+        const json   = await res.json();
+        hospitalData = { ...hospitalData, ...payload, ...(json.data ?? {}) };
+
+        showFlash('Settings saved successfully', 'success');
+
+      } catch (err) {
+        showFlash(err.message, 'error');
+        console.error(err);
+      } finally {
+        saveBtn.disabled  = false;
+        saveBtn.innerHTML = '<i class="ti ti-device-floppy text-base"></i> Save Settings';
+      }
+    }
+
+    // ─── INIT ────────────────────────────────────────
+    loadSettings();
+  </script>
+  <script src="/js/tabs.js"></script>
+  <script src="/js/stats.js"></script>
+
+<%- include('../error_flash.ejs') %>
+</body>
+</html>

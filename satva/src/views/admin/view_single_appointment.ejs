@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Appointment Details — Satva Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { primary: '#00966B' }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-gray-50 font-sans min-h-screen">
+
+  <div class="max-w-4xl mx-auto px-6 pt-7">
+    <a href="/admin/appointments" class="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-green-600 transition mb-6">
+      <i class="ti ti-arrow-left text-base"></i> Back to Appointments
+    </a>
+  </div>
+
+  <div class="max-w-4xl mx-auto px-6 pb-12">
+
+    <div id="loading-state" class="flex flex-col items-center justify-center py-24 gap-3 bg-white rounded-2xl border border-gray-200 shadow-sm">
+      <i class="ti ti-loader-2 text-4xl text-green-600 animate-spin"></i>
+      <p class="text-sm text-gray-500">Retrieving appointment profile...</p>
+    </div>
+
+    <div id="error-state" class="hidden flex flex-col items-center justify-center py-24 gap-3 bg-white rounded-2xl border border-gray-200 shadow-sm">
+      <i class="ti ti-alert-circle text-4xl text-red-500"></i>
+      <p class="text-sm font-semibold text-gray-800">Unable to load details</p>
+      <p id="error-msg" class="text-xs text-gray-400"></p>
+      <button onclick="fetchAppointmentDetails()" class="mt-2 px-4 py-2 bg-green-50 text-green-600 rounded-lg text-sm font-medium hover:bg-green-100 transition">Retry</button>
+    </div>
+
+    <div id="details-content" class="hidden bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+      
+      <div class="border-b border-gray-100 p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-gradient-to-r from-white to-gray-50">
+        <div>
+          <div class="flex items-center gap-3">
+            <h1 class="text-xl font-bold text-gray-900">Appointment Profile</h1>
+            <span id="app-id" class="text-xs font-mono bg-gray-100 text-gray-600 px-2 py-0.5 rounded">ID: —</span>
+          </div>
+          <p class="text-sm text-gray-500 mt-1">Reviewing recorded schedule parameters</p>
+        </div>
+        <div>
+          <span id="app-status" class="text-sm font-medium px-3.5 py-1.5 rounded-full border">
+            —
+          </span>
+        </div>
+      </div>
+
+      <div class="p-6 sm:p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+        
+        <div class="space-y-6">
+          <h2 class="text-sm font-bold uppercase tracking-wider text-gray-400 flex items-center gap-2">
+            <i class="ti ti-user text-base text-gray-400"></i> Patient Demographics
+          </h2>
+          <div class="bg-gray-50 rounded-xl p-5 border border-gray-100">
+            <div class="text-xs text-gray-400 uppercase tracking-wider">Full Name</div>
+            <div id="patient-name" class="text-lg font-semibold text-gray-900 mt-1">—</div>
+          </div>
+        </div>
+
+        <div class="space-y-6">
+          <h2 class="text-sm font-bold uppercase tracking-wider text-gray-400 flex items-center gap-2">
+            <i class="ti ti-stethoscope text-base text-gray-400"></i> Clinical Context
+          </h2>
+          <div class="bg-gray-50 rounded-xl p-5 border border-gray-100 space-y-4">
+            <div>
+              <div class="text-xs text-gray-400 uppercase tracking-wider">Assigned Practitioner</div>
+              <div id="doctor-name" class="text-base font-semibold text-gray-900 mt-0.5">—</div>
+            </div>
+            <div class="pt-3 border-t border-gray-200/60 grid grid-cols-2 gap-4">
+              <div>
+                <div class="text-xs text-gray-400 uppercase tracking-wider">Target Time</div>
+                <div id="start-time" class="text-base font-medium text-gray-800 mt-0.5">—</div>
+              </div>
+              <div>
+                <div class="text-xs text-gray-400 uppercase tracking-wider">Modality</div>
+                <div id="appointment-type" class="text-base font-medium text-gray-800 mt-0.5">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="border-t border-gray-100 bg-gray-50/50 px-6 sm:p-8 py-4 flex justify-end gap-3">
+        <button onclick="window.print()" class="inline-flex items-center gap-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-xl px-4 py-2.5 hover:bg-gray-50 transition">
+          <i class="ti ti-printer"></i> Print Summary
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    // ─── EXTRACT APPOINTMENT ID FROM URL ROUTE ────────────────────────
+    // Grabs the ID automatically from an URL structure like: /admin/appointments/32
+    const pathSegments = window.location.pathname.split('/');
+    const APPOINTMENT_ID = pathSegments[pathSegments.length - 1];
+    
+    const API_URL = `http://localhost:3333/api/v1/admin/appointments/${APPOINTMENT_ID}`;
+
+    // ─── UI MANAGEMENT HELPERS ───────────────────────────────────────
+    function toggleViews(showData, showError = false) {
+      document.getElementById('loading-state').style.display = 'none';
+      document.getElementById('details-content').style.display = showData ? 'block' : 'none';
+      document.getElementById('error-state').style.display = showError ? 'flex' : 'none';
+    }
+
+    function formatTime(timeStr) {
+      if (!timeStr) return '—';
+      const [h, m] = timeStr.split(':');
+      const hour = parseInt(h);
+      const ampm = hour >= 12 ? 'PM' : 'AM';
+      const h12 = hour % 12 || 12;
+      return `${h12}:${m} ${ampm}`;
+    }
+
+    function statusStyles(status) {
+      const map = {
+        COMPLETED:   'bg-green-50 text-green-700 border-green-200',
+        CONFIRMED:   'bg-blue-50 text-blue-700 border-blue-200',
+        CHECKED_IN:  'bg-teal-50 text-teal-700 border-teal-200',
+        IN_PROGRESS: 'bg-yellow-50 text-yellow-700 border-yellow-200',
+        CANCELLED:   'bg-red-50 text-red-600 border-red-200',
+      };
+      return map[status] ?? 'bg-gray-50 text-gray-600 border-gray-200';
+    }
+
+    // ─── INITIALIZATION FETCH METHOD ─────────────────────────────────
+    async function fetchAppointmentDetails() {
+      if (!APPOINTMENT_ID || isNaN(APPOINTMENT_ID)) {
+        toggleViews(false, true);
+        document.getElementById('error-msg').textContent = 'Invalid structural appointment identity key.';
+        return;
+      }
+
+      try {
+        const response = await fetch(API_URL, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('accessToken') ?? ''}`
+          }
+        });
+
+        if (!response.ok) throw new Error(`Server returned operational status code ${response.status}`);
+
+        const resBody = await response.json();
+        
+        // Match the structural array layout: json.data[0]
+        const appointment = Array.isArray(resBody.data) ? resBody.data[0] : resBody.data;
+
+        if (!appointment) {
+          throw new Error("Target record profile payload parsed as empty.");
+        }
+
+        // Apply fields to target UI elements
+        document.getElementById('app-id').textContent = `ID: ${appointment.appointment_id}`;
+        document.getElementById('patient-name').textContent = appointment.patient_name || '—';
+        document.getElementById('doctor-name').textContent = `Dr. ${appointment.doctor_name || '—'}`;
+        document.getElementById('start-time').textContent = formatTime(appointment.start_time);
+        document.getElementById('appointment-type').textContent = appointment.appointment_type === 'IN_PERSON' ? '🏥 In Person' : '💻 Telemedicine';
+        
+        // Status element configuration
+        const statusEl = document.getElementById('app-status');
+        statusEl.textContent = appointment.appointment_status;
+        statusEl.className = `text-xs font-semibold px-3 py-1 rounded-full border ${statusStyles(appointment.appointment_status)}`;
+
+        // Display interface map
+        toggleViews(true);
+
+      } catch (err) {
+        console.error("Data binding error details:", err);
+        toggleViews(false, true);
+        document.getElementById('error-msg').textContent = err.message;
+      }
+    }
+
+    // Execute on initialization
+    fetchAppointmentDetails();
+  </script>
+</body>
+</html>

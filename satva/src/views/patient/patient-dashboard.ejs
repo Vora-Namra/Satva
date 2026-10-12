@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Satva - Patient Dashboard</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+<script type="module">
+  import { checkJwt } from "/js/check-jwt.js";
+
+  checkJwt();
+</script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#10A37F",
+              "primary-dark": "#0d8a6a",
+              "primary-light": "#e6f7f3",
+              "bg-page": "#f0faf6",
+              dark: "#0f1923",
+            },
+            fontFamily: {
+              sans: ["'DM Sans'", "system-ui", "sans-serif"],
+              display: ["'Playfair Display'", "Georgia", "serif"],
+            },
+            keyframes: {
+              fadeUp: {
+                "0%": { opacity: 0, transform: "translateY(24px)" },
+                "100%": { opacity: 1, transform: "translateY(0)" },
+              },
+            },
+            animation: {
+              fadeUp: "fadeUp 0.7s ease both",
+            },
+          },
+        },
+      };
+    </script>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      body {
+        font-family: "DM Sans", sans-serif;
+      }
+
+      .nav-link {
+        position: relative;
+      }
+
+      .nav-link::after {
+        content: "";
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: #10a37f;
+        transition: width 0.3s;
+      }
+
+      .nav-link:hover::after {
+        width: 100%;
+      }
+
+      .card-hover {
+        transition:
+          transform 0.25s,
+          box-shadow 0.25s;
+      }
+
+      .card-hover:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 32px rgba(16, 163, 127, 0.12);
+      }
+
+      .stat-card {
+        border-left: 4px solid #10a37f;
+      }
+
+      .testimonial-card {
+        border-top: 3px solid #10a37f;
+      }
+    </style>
+  </head>
+
+  <body class="bg-bg-page text-gray-800 min-h-screen">
+   
+<%- include('../partials/patient-header', { title: 'dashboard' }) %>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <!-- Welcome -->
+      <section class="mb-10 mt-6 animate-fadeUp">
+        <h2 class="font-display text-4xl text-dark mb-2">
+          Welcome Back,
+          <span class="text-primary" id="patient_name"></span>
+        </h2>
+        <p class="text-gray-600">
+          Manage your appointments, records and healthcare journey.
+        </p>
+      </section>
+
+      <!-- Quick Actions -->
+      <section
+        class="grid lg:grid-cols-4 md:grid-cols-2 gap-5 mb-10 animate-fadeUp"
+      >
+        <a
+          href="/patient/book-appointment"
+          class="bg-primary text-white p-6 rounded-2xl card-hover shadow-sm"
+        >
+          <p class="text-sm opacity-90">Quick Action</p>
+          <h3 class="font-semibold text-lg mt-2">Book Appointment</h3>
+          <div class="text-3xl mt-4">+</div>
+        </a>
+
+        <div class="bg-green-100 rounded-2xl p-6 stat-card shadow-sm">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="size-6"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5"
+            />
+          </svg>
+          <p class="text-gray-500 mt-3">Upcoming Appointments</p>
+          <h3 id="upcomingCount" class="text-3xl font-bold mt-2 text-dark">
+            0
+          </h3>
+        </div>
+
+        <div class="bg-green-100 rounded-2xl p-6 stat-card shadow-sm">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="size-6"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25ZM6.75 12h.008v.008H6.75V12Zm0 3h.008v.008H6.75V15Zm0 3h.008v.008H6.75V18Z"
+            />
+          </svg>
+          <p class="text-gray-500 mt-3">Medical Records</p>
+          <h3 id="recordCount" class="text-3xl font-bold mt-2 text-dark">0</h3>
+        </div>
+
+        <div class="bg-green-100 rounded-2xl p-6 stat-card shadow-sm">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="size-6"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0M3.124 7.5A8.969 8.969 0 0 1 5.292 3m13.416 0a8.969 8.969 0 0 1 2.168 4.5"
+            />
+          </svg>
+          <p class="text-gray-500 mt-3">Notifications</p>
+          <h3 id="notificationCountDashboard" class="text-3xl font-bold mt-2 text-dark">
+            0
+          </h3>
+        </div>
+      </section>
+
+      <!-- Dashboard Grid -->
+      <section class="grid lg:grid-cols-2 gap-6">
+        <!-- Upcoming Appointments -->
+        <div
+          class="bg-white rounded-2xl p-6 shadow-sm card-hover animate-fadeUp"
+        >
+          <div class="flex justify-between items-center mb-5">
+            <h3 class="font-display text-2xl text-dark">
+              Upcoming Appointments
+            </h3>
+            <a
+              href="/patient/my-appointments"
+              class="text-primary font-medium hover:text-primary-dark transition"
+            >
+              View All
+            </a>
+          </div>
+
+          <div id="appointmentsContainer" class="space-y-4">
+            <div class="text-center py-10 text-gray-500">
+              Loading appointments...
+            </div>
+          </div>
+        </div>
+
+        <!-- Medical Records -->
+        <div
+          class="bg-white rounded-2xl p-6 shadow-sm card-hover animate-fadeUp"
+        >
+          <div class="flex justify-between items-center mb-5">
+            <h3 class="font-display text-2xl text-dark">Recent Records</h3>
+            <a
+              href="/patient/records"
+              class="text-primary font-medium hover:text-primary-dark transition"
+            >
+              View All
+            </a>
+          </div>
+
+          <div id="recordsContainer" class="space-y-4">
+            <div class="text-center py-10 text-gray-500">No records found</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Health Summary -->
+      <section
+        class="mt-8 bg-gradient-to-r from-primary to-primary-dark rounded-2xl p-8 text-white shadow-sm animate-fadeUp"
+      >
+        <h3 class="font-display text-3xl mb-6">Health Summary</h3>
+
+        <div class="grid md:grid-cols-4 gap-4">
+          <div class="bg-white/10 rounded-xl p-5 backdrop-blur">
+            <p class="text-sm opacity-80">Blood Group</p>
+            <h4 id="bloodGroup" class="text-2xl font-bold mt-2">--</h4>
+          </div>
+
+          <div class="bg-white/10 rounded-xl p-5 backdrop-blur">
+            <p class="text-sm opacity-80">Gender</p>
+            <h4 id="gender" class="text-2xl font-bold mt-2">--</h4>
+          </div>
+
+          <div class="bg-white/10 rounded-xl p-5 backdrop-blur">
+            <p class="text-sm opacity-80">Date of Birth</p>
+            <h4 id="dob" class="text-xl font-bold mt-2">--</h4>
+          </div>
+
+          <div class="bg-white/10 rounded-xl p-5 backdrop-blur">
+            <p class="text-sm opacity-80">Profile Status</p>
+            <h4 class="text-xl font-bold mt-2">Active</h4>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <%- include('../partials/footer') %>
+
+    <script>
+      const token = localStorage.getItem("accessToken");
+      function statusPill(status) {
+        const map = {
+          CONFIRMED: "bg-green-100 text-green-700",
+          PAYMENT_PENDING: "bg-yellow-100 text-yellow-700",
+          COMPLETED: "bg-blue-100 text-blue-700",
+          CANCELLED: "bg-red-100 text-red-700",
+          NO_SHOW: "bg-gray-100 text-gray-700",
+          RESCHEDULED: "bg-primary-light text-primary",
+        };
+
+        return map[status] || "bg-gray-100 text-gray-700";
+      }
+      async function loadDashboard() {
+        try {
+          const profileRes = await fetch("/api/v1/patient/profile", {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          if(profileRes.status === 401){
+            throw new Error("Unauthorized");
+          }
+
+          const profile = await profileRes.json();
+          console.log(profile);
+          localStorage.setItem("user",JSON.stringify(profile));
+          if (profile.data) {
+            document.getElementById("bloodGroup").textContent =
+              profile.data.blood_group || "--";
+
+            document.getElementById("gender").textContent =
+              profile.data.gender || "--";
+
+            document.getElementById("dob").textContent =
+              profile.data.dob?.split("T")[0] || "--";
+
+
+          }
+
+          localStorage.setItem(
+            "username",
+            `${profile.data?.first_name} ${profile.data?.last_name}` || "Patient",
+          );
+
+          const appointmentsRes = await fetch("/api/v1/appointments/patient", {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          const appointments = await appointmentsRes.json();
+          console.log(appointments);
+
+          document.getElementById("upcomingCount").textContent =
+            appointments.data?.length || 0;
+
+          const appointmentContainer = document.getElementById(
+            "appointmentsContainer",
+          );
+          appointmentContainer.innerHTML = "";
+
+          appointments.data?.slice(0, 3).forEach((appt) => {
+            const app_date = appt.slot_date.split("T")[0];
+
+            appointmentContainer.innerHTML += `
+            <div class="bg-bg-page rounded-2xl border border-gray-100 px-4 py-4 card-hover">
+              <div class="flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-11 h-11 rounded-full bg-primary text-white flex items-center justify-center shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"></path>
+                    </svg>
+                  </div>
+
+                  <div>
+                    <p class="text-sm font-semibold text-dark">
+                      Dr. ${appt.doctor_first_name || "unknown"} ${appt.doctor_last_name || ""}
+                    </p>
+                    <p class="text-xs text-gray-500">
+                      ${appt.specialties || appt.hospital_name || "Doctor"}
+                    </p>
+                    <p class="text-xs text-gray-500 mt-0.5">
+                      ${app_date} • ${appt.start_time}
+                    </p>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                  <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-primary-light text-primary">
+                    ${
+                      appt.appointment_type === "TELEMEDICINE"
+                        ? `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
+</svg>
+`
+                        : `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+</svg>
+`
+                    }
+                  </span>
+
+                      <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${statusPill(appt.appointment_status)}">
+                        ${appt.appointment_status}
+                      </span>
+                </div>
+              </div>
+            </div>
+          `;
+          });
+
+          const recordsRes = await fetch("/api/v1/patient/records", {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          const records = await recordsRes.json();
+          document.getElementById("recordCount").textContent =
+            records.data?.length || 0;
+
+          const recordsContainer = document.getElementById("recordsContainer");
+          recordsContainer.innerHTML = "";
+
+          if (records.data && records.data.length > 0) {
+            records.data.slice(0, 3).forEach((record) => {
+              recordsContainer.innerHTML += `
+              <div class="border border-gray-100 rounded-2xl p-4 bg-bg-page card-hover">
+                <div class="flex items-start justify-between mb-1">
+                  <p class="text-sm font-semibold text-dark">${record.record_title || record.title || "Medical Record"}</p>
+                  <p class="text-xs text-gray-400">${(record.created_at || "").split("T")[0] || ""}</p>
+                </div>
+                <p class="text-xs text-gray-500 mb-0.5">${record.doctor_name || record.doctor_first_name ? `Dr. ${record.doctor_first_name || ""} ${record.doctor_last_name || ""}` : ""}</p>
+                <p class="text-xs text-gray-400 mb-2">${record.diagnosis || record.examination_notes || "No details available"}</p>
+                <a href="/patient/records/${record.record_id}" class="text-xs text-primary font-semibold hover:text-primary-dark transition">
+                  View Details
+                </a>
+              </div>
+            `;
+            });
+          } else {
+            recordsContainer.innerHTML = `<div class="text-center py-10 text-gray-500">No records found</div>`;
+          }
+
+          const notificationsRes = await fetch(
+            "/api/v1/notifications/unread/count",
+            {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            },
+          );
+
+          const notifications = await notificationsRes.json();
+          console.log(notifications);
+          document.getElementById("notificationCountDashboard").textContent =
+            notifications.data?.count || 0;
+        } catch (err) {
+          console.error("Dashboard Error:", err);
+          if(err.message == "Unauthorized"){
+            localStorage.removeItem("accessToken");
+            window.location.replace("/login");
+          }
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", loadDashboard);
+      loadDashboard();
+    </script>
+  </body>
+</html>

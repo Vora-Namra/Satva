@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Satva - Medical Records</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script type="module">
+      import { checkJwt } from "/js/check-jwt.js";
+
+      checkJwt();
+    </script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#10A37F",
+              "primary-dark": "#0d8a6a",
+              "primary-light": "#e6f7f3",
+              "bg-page": "#f0faf6",
+              dark: "#0f1923",
+            },
+            fontFamily: {
+              sans: ["DM Sans", "sans-serif"],
+              display: ["Playfair Display", "serif"],
+            },
+          },
+        },
+      };
+    </script>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body class="bg-bg-page min-h-screen font-sans">
+    <!-- Header -->
+
+    <%- include('../partials/patient-header', { title: 'my-records' }) %>
+
+
+    <main class="max-w-7xl mx-auto px-6 py-10">
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h1 class="font-display text-4xl text-dark">Medical Records</h1>
+
+          <p class="text-gray-500 mt-2">View all your consultation history</p>
+        </div>
+      </div>
+      <a
+        href="/patient/dashboard"
+        id="backToSearchBtn"
+        class="inline-flex items-center gap-2 text-gray-500 hover:text-dark mb-6"
+      >
+        <svg
+          class="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M15 19l-7-7 7-7"
+          ></path>
+        </svg>
+        Back to dashboard
+      </a>
+      <div id="recordsContainer" class="grid lg:grid-cols-2 gap-6">
+        <div class="text-center py-10">Loading records...</div>
+      </div>
+    </main>
+
+    <%- include('../partials/footer') %>
+
+    <script>
+      const token = localStorage.getItem("accessToken");
+
+   
+      async function loadRecords() {
+        try {
+          const response = await fetch("/api/v1/patient/records", {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          });
+
+          const result = await response.json();
+          console.log(result);
+          const container = document.getElementById("recordsContainer");
+
+          container.innerHTML = "";
+
+          if (!result.data?.length) {
+            container.innerHTML = `
+                              <div class="col-span-2 bg-white rounded-2xl p-10 text-center">
+                              No Medical Records Found
+                              </div>
+                              `;
+
+            return;
+          }
+
+          result.data.forEach((record) => {
+            const doc_name = `${record.doctor_first_name} ${record.doctor_last_name}`;
+            console.log(doc_name);
+            container.innerHTML += ` <div class="bg-white rounded-2xl p-6 shadow-sm border">
+
+                                          <div class="flex justify-between items-start">
+
+                                          <div>
+
+                                          <h3 class="font-semibold text-lg">
+                                          ${record.diagnosis || "Medical Record"}
+                                          </h3>
+
+                                          <p class="text-sm text-gray-500 mt-1">
+                                          Record ID :
+                                          ${record.record_id}
+                                          </p>
+
+                                          </div>
+
+                                          <span class="text-xs bg-primary-light text-primary px-3 py-1 rounded-full">
+                                          Medical Record
+                                          </span>
+
+                                          </div>
+
+                                          <div class="mt-5 space-y-3">
+
+                                          <div>
+
+                                          <p class="text-xs text-gray-500">
+                                          Doctor Name
+                                          </p>
+
+                                          <p class="font-medium">
+                                          ${doc_name} 
+                                          </p>
+
+                                          </div>
+
+                                          <div>
+
+                                          <p class="text-xs text-gray-500">
+                                          Appointment ID
+                                          </p>
+
+                                          <p class="font-medium">
+                                          ${record.appointment_id}
+                                          </p>
+
+                                          </div>
+
+                                          <div>
+
+                                          <p class="text-xs text-gray-500">
+                                          Examination Notes
+                                          </p>
+
+                                          <p class="text-sm text-gray-700 mt-1">
+                                          ${record.examination_notes}
+                                          </p>
+
+                                          </div>
+
+                                          </div>
+
+                                          <div class="mt-6 flex gap-3">
+
+                                          <button
+                                          onclick="window.location.href='/patient/records/${record.record_id}'"
+                                          class="px-4 py-2 rounded-xl bg-primary text-white hover:bg-primary-dark"
+                                          >
+                                          View Details
+                                          </button>
+
+
+
+                                          </div>
+
+                                          </div>
+
+                                          `;
+          });
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      loadRecords();
+    </script>
+
+    <script type="module">
+      import { downloadMedicalRecord } from "/js/download-record.js";
+      import { logout } from "/js/logout.js";
+      const logout_btn = document.getElementById("logoutBtn");
+      logout_btn.addEventListener("click", async function (e) {
+        e.preventDefault();
+        await logout();
+      });
+
+      window.downloadRecord = async function (recordId) {
+        const token = localStorage.getItem("accessToken");
+
+        const response = await fetch(`/api/v1/patient/records/${recordId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const result = await response.json();
+
+        await downloadMedicalRecord(result.data);
+      };
+    </script>
+  </body>
+</html>

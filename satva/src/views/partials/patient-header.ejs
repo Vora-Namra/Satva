@@ -1,0 +1,123 @@
+  <header class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6">
+
+      <div class="flex items-center justify-between h-20">
+
+        <a href="/" class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-full bg-primary text-white flex items-center justify-center font-bold">
+            S
+          </div>
+
+          <div>
+            <h1 class="font-display text-2xl text-dark">
+              Satva
+            </h1>
+            <p class="text-xs text-gray-500">
+              Hospital Appointment System
+            </p>
+          </div>
+        </a>
+
+        <nav class="hidden md:flex items-center gap-8">
+          <a href="/patient/dashboard" class="hover:text-primary">
+            Dashboard
+          </a>
+
+          <a href="/patient/doctors" class="hover:text-primary">
+            Doctors
+          </a>
+
+          <a href="/patient/my-appointments" class="hover:text-primary">
+            Appointments
+          </a>
+
+          <a href="/patient/records" class="hover:text-primary">
+            Records
+          </a>
+
+          <a href="/patient/profile" class="hover:text-primary">
+            Profile
+          </a>
+        </nav>
+
+        <div class="flex items-center gap-3">
+          <!-- ===================== Notification Popup ===================== -->
+          <div class="relative">
+            <button id="notificationBtn" class="relative p-2 rounded-xl hover:bg-primary-light text-gray-700 hover:text-primary transition" aria-label="Notifications">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.17V11a6 6 0 10-12 0v3.17a2 2 0 01-.6 1.43L4 17h5m6 0a3 3 0 11-6 0m6 0H9" />
+              </svg>
+              <span id="notificationCount" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center hidden"></span>
+            </button>
+            <div id="notificationPopup" class="hidden absolute right-0 mt-3 w-96 bg-white rounded-xl shadow-lg border z-50">
+              <div class="p-4 border-b flex justify-between items-center">
+                <h3 class="font-semibold text-lg text-gray-800">Notifications</h3>
+                <button id="markAllReadBtn" class="text-sm text-primary hover:underline">Mark all as read</button>
+              </div>
+              <div id="notificationList" class="max-h-96 overflow-y-auto">
+                <!-- Notifications will come here -->
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <img
+              id="userAvatar"
+              src="https://ui-avatars.com/api/?name=Patient"
+              class="w-10 h-10 rounded-full object-cover"
+            />
+
+            <div>
+              <p id="userName" class="text-sm font-semibold">
+                Patient
+              </p>
+
+              <p id="userRole" class="text-xs text-gray-500">
+                Patient
+              </p>
+            </div>
+              <button id="logoutBtn" class="bg-red-500 px-3 py-1 mx-2 text-white rounded-md">Logout</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+  const profile = JSON.parse(localStorage.getItem("user") || "{}");
+    console.log(profile)
+  const patient = profile?.data;
+
+  if (!patient) return;
+
+  const fullName =
+    `${patient.first_name || ""} ${patient.last_name || ""}`.trim();
+
+  const userName = document.getElementById("userName");
+  const userRole = document.getElementById("userRole");
+  const userAvatar = document.getElementById("userAvatar");
+
+  if (userName) userName.textContent = fullName || "Patient";
+  if (userRole) userRole.textContent = "Patient";
+
+  if (userAvatar) {
+    userAvatar.src = patient.profile_path
+      ? `/${patient.profile_path}`
+      : `https://ui-avatars.com/api/?name=${encodeURIComponent(fullName || "Patient")}`;
+  }
+});
+</script>
+    <script type="module">
+      import { logout } from "/js/logout.js";
+      const logout_btn = document.getElementById("logoutBtn");
+      logout_btn.addEventListener("click", async function (e) {
+        e.preventDefault();
+        await logout();
+        
+      });
+    </script>
+
+          <script src="/js/notification.js"></script>

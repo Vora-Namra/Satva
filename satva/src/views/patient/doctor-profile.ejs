@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+<script type="module">
+  import { checkJwt } from "/js/check-jwt.js";
+  checkJwt();
+</script>
+  <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#10A37F",
+              "primary-dark": "#0d8a6a",
+              "primary-light": "#e6f7f3",
+              "bg-page": "#f0faf6",
+              dark: "#0f1923",
+            },
+            fontFamily: {
+              sans: ["'DM Sans'", "system-ui", "sans-serif"],
+              display: ["'Playfair Display'", "Georgia", "serif"],
+            },
+            keyframes: {
+              fadeUp: {
+                "0%": { opacity: 0, transform: "translateY(24px)" },
+                "100%": { opacity: 1, transform: "translateY(0)" },
+              },
+            },
+            animation: {
+              fadeUp: "fadeUp 0.7s ease both",
+            },
+          },
+        },
+      };
+    </script>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap"
+      rel="stylesheet"
+    />
+
+</head>
+<body>
+
+    <%- include('../partials/patient-header', { title: 'doctor-profile' }) %>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+         <!-- Back Button -->
+        <div class="mb-6">
+            <a
+            href="/patient/dashboard"
+            class="inline-flex items-center gap-2 text-gray-600 hover:text-primary transition font-medium"
+            >
+            <svg
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+            >
+                <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M15 19l-7-7 7-7"
+                />
+            </svg>
+
+            Back to Dashboard
+            </a>
+        </div>
+
+        <!-- Doctor Hero -->
+        <section
+            class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 mb-8"
+        >
+            <div class="flex flex-col lg:flex-row gap-8">
+
+            <img
+                id="doctorImage"
+                src="https://ui-avatars.com/api/?name=Doctor"
+                class="w-40 h-40 rounded-3xl object-cover ring-4 ring-primary-light"
+            />
+
+            <div class="flex-1">
+
+                <div class="flex flex-wrap items-center gap-3 mb-4">
+
+                <h1
+                    id="doctorName"
+                    class="text-4xl font-bold text-dark"
+                >
+                    Loading...
+                </h1>
+
+                <span
+                    class="px-3 py-1 rounded-full bg-primary-light text-primary text-sm font-semibold"
+                >
+                    Doctor
+                </span>
+
+                </div>
+
+                <p
+                id="doctorSpecialties"
+                class="text-lg text-gray-600 mb-4"
+                >
+                --
+                </p>
+
+                <p
+                id="doctorBio"
+                class="text-gray-600 leading-relaxed"
+                >
+                Loading profile...
+                </p>
+
+            </div>
+
+            </div>
+        </section>
+
+        <!-- Information Grid -->
+        <div class="grid lg:grid-cols-2 gap-6">
+
+            <!-- Professional Information -->
+            <div
+            class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6"
+            >
+            <h2 class="text-xl font-bold mb-6 text-dark">
+                Professional Information
+            </h2>
+
+            <div class="space-y-5">
+
+                <div>
+                <p class="text-sm text-gray-500">
+                    Qualifications
+                </p>
+
+                <p
+                    id="doctorQualifications"
+                    class="font-semibold text-dark mt-1"
+                >
+                    --
+                </p>
+                </div>
+
+                <div>
+                <p class="text-sm text-gray-500">
+                    Experience
+                </p>
+
+                <p
+                    id="doctorExperience"
+                    class="font-semibold text-dark mt-1"
+                >
+                    --
+                </p>
+                </div>
+
+                <div>
+                <p class="text-sm text-gray-500">
+                    Consultation Fee
+                </p>
+
+                <p
+                    id="doctorFee"
+                    class="font-semibold text-primary mt-1 text-lg"
+                >
+                    --
+                </p>
+                </div>
+
+            </div>
+            </div>
+
+            <!-- Hospital Information -->
+            <div
+            class="bg-white rounded-3xl border border-gray-100 shadow-sm p-6"
+            >
+            <h2 class="text-xl font-bold mb-6 text-dark">
+                Hospital Information
+            </h2>
+
+            <div class="space-y-5">
+
+                <div>
+                <p class="text-sm text-gray-500">
+                    Hospital
+                </p>
+
+                <p
+                    id="hospitalName"
+                    class="font-semibold text-dark mt-1"
+                >
+                    --
+                </p>
+                </div>
+
+                <div>
+                <p class="text-sm text-gray-500">
+                    Address
+                </p>
+
+                <p
+                    id="hospitalAddress"
+                    class="font-semibold text-dark mt-1"
+                >
+                    --
+                </p>
+                </div>
+
+            </div>
+            </div>
+
+        </div>
+
+        <!-- CTA -->
+        <div
+            class="mt-8 bg-primary rounded-3xl p-8 text-white flex flex-col lg:flex-row justify-between items-center gap-6"
+        >
+
+            <div>
+            <h2 class="text-2xl font-bold">
+                Ready to Book an Appointment?
+            </h2>
+
+            <p class="text-green-100 mt-2">
+                Schedule your consultation with this doctor.
+            </p>
+            </div>
+
+            <button
+            id="bookAppointmentBtn"
+            class="bg-white text-primary px-6 py-3 rounded-xl font-semibold hover:bg-gray-100 transition"
+            >
+            Book Appointment
+            </button>
+
+        </div>
+
+    </main>
+</body>
+<script>
+const doctorId =
+  window.location.pathname.split("/").pop();
+const bookAppointmentBtn = document.getElementById("bookAppointmentBtn");
+bookAppointmentBtn.addEventListener("click",()=>{
+  window.location.href = `/appointment/book/${doctorId}`;
+})
+
+
+async function loadDoctor() {
+  try {
+
+    const doctorId = window.location.pathname.split("/").pop();
+    const token = localStorage.getItem("accessToken");
+    const username = localStorage.getItem("username");
+
+    const response = await fetch(
+      `/api/v1/patient/doctors/${doctorId}`,{
+        method:"GET",
+        headers:{
+          Authorization:`Bearer ${token}`,
+          "Content-Type":"application/json"
+        }
+      }
+    );
+
+    const result = await response.json();
+    console.log(result)
+    const doctor = result.data;
+
+    if (!doctor) return;
+
+    document.getElementById("doctorName").textContent =
+      `Dr. ${doctor.first_name} ${doctor.last_name}`;
+
+    document.getElementById("doctorSpecialties").textContent =
+      doctor.specialties || "--";
+
+    document.getElementById("doctorBio").textContent =
+      doctor.bio || "No description available.";
+
+    document.getElementById("doctorQualifications").textContent =
+      doctor.qualifications || "--";
+
+    document.getElementById("doctorExperience").textContent =
+      doctor.experience_years
+        ? `${doctor.experience_years} Years`
+        : "--";
+
+    document.getElementById("doctorFee").textContent =
+      doctor.consultation_fee
+        ? `₹${doctor.consultation_fee}`
+        : "--";
+
+    document.getElementById("hospitalName").textContent =
+      doctor.hospital_name || "--";
+
+    document.getElementById("hospitalAddress").textContent =
+      doctor.hospital_address || "--";
+
+    document.getElementById("doctorImage").src =
+      doctor.profile_picture ||
+      `https://ui-avatars.com/api/?name=${encodeURIComponent(
+        `${doctor.first_name} ${doctor.last_name}`
+      )}&background=10A37F&color=fff`;
+
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+loadDoctor();
+</script>
+<script type="module">
+  import { logout } from "/js/logout.js";
+
+      const logout_btn = document.getElementById("logoutBtn");
+      logout_btn.addEventListener("click", async function (e) {
+        e.preventDefault();
+        await logout();
+      });
+</script>
+</html>

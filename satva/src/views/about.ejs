@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Satva - About Us</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#10A37F",
+            "primary-dark": "#0d8a6a",
+            "primary-light": "#e6f7f3",
+            "bg-page": "#f0faf6",
+            dark: "#0f1923",
+          },
+          fontFamily: {
+            sans: ["DM Sans", "sans-serif"],
+            display: ["Playfair Display", "serif"],
+          },
+        },
+      },
+    };
+  </script>
+</head>
+
+<body class="bg-bg-page text-gray-800 min-h-screen font-sans">
+  <%- include('partials/header') %>
+
+  <main class="pt-10">
+    <section class="bg-gradient-to-br from-primary to-primary-dark text-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-24">
+        <div class="max-w-3xl">
+          <span class="inline-flex items-center rounded-full bg-white/15 px-4 py-2 text-sm font-semibold">
+            About Satva
+          </span>
+          <h1 class="mt-6 font-display text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight">
+            Care made simple for every patient.
+          </h1>
+          <p class="mt-6 text-lg sm:text-xl text-white/90 leading-relaxed">
+            Satva is a hospital appointment and medical records platform designed to make healthcare more organized, accessible, and understandable.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+      <div class="grid lg:grid-cols-2 gap-12 items-center">
+        <div>
+          <img
+            src="https://img.magnific.com/free-photo/team-young-specialist-doctors-standing-corridor-hospital_1303-21199.jpg?semt=ais_hybrid&w=740&q=80"
+            alt="Medical team"
+            class="rounded-[2rem] shadow-2xl w-full h-[420px] object-cover"
+          />
+        </div>
+
+        <div>
+          <h2 class="font-display text-3xl sm:text-4xl font-bold text-dark">Our mission</h2>
+          <p class="mt-6 text-gray-600 leading-8">
+            We are building a secure healthcare system where patients can book appointments, receive prescriptions, view records, and connect with doctors from one dashboard.
+          </p>
+          <p class="mt-4 text-gray-600 leading-8">
+            The goal is to reduce complexity and give patients a clearer understanding of their care journey.
+          </p>
+
+          <div class="mt-8 grid sm:grid-cols-3 gap-4">
+            <div class="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm">
+              <div class="text-primary text-2xl font-bold">Secure</div>
+              <div class="text-sm text-gray-500 mt-1">Private and protected data</div>
+            </div>
+            <div class="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm">
+              <div class="text-primary text-2xl font-bold">Simple</div>
+              <div class="text-sm text-gray-500 mt-1">Easy to use for everyone</div>
+            </div>
+            <div class="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm">
+              <div class="text-primary text-2xl font-bold">Modern</div>
+              <div class="text-sm text-gray-500 mt-1">Built for current workflows</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="bg-white border-y border-gray-100">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <h2 class="text-center font-display text-3xl sm:text-4xl font-bold text-dark">What we focus on</h2>
+        <div class="mt-10 grid md:grid-cols-3 gap-6">
+          <div class="rounded-[2rem] p-6 bg-bg-page border border-gray-100">
+            <h3 class="text-xl font-bold text-dark">Patient experience</h3>
+            <p class="mt-3 text-gray-600">Clear appointment flows and easy access to records.</p>
+          </div>
+          <div class="rounded-[2rem] p-6 bg-bg-page border border-gray-100">
+            <h3 class="text-xl font-bold text-dark">Doctor productivity</h3>
+            <p class="mt-3 text-gray-600">Schedules, telemedicine, and medical notes in one place.</p>
+          </div>
+          <div class="rounded-[2rem] p-6 bg-bg-page border border-gray-100">
+            <h3 class="text-xl font-bold text-dark">Hospital operations</h3>
+            <p class="mt-3 text-gray-600">Better coordination, auditability, and management.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <%- include('partials/footer') %>
+</body>
+</html>

@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Satva — Complete Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#10A37F",
+              "primary-dark": "#0d8a6a",
+              "primary-light": "#e6f7f3",
+              "bg-page": "#f0faf6",
+              dark: "#0f1923",
+            },
+            fontFamily: {
+              sans: ["'DM Sans'", "system-ui", "sans-serif"],
+              display: ["'Playfair Display'", "Georgia", "serif"],
+            },
+            keyframes: {
+              fadeUp: {
+                "0%": { opacity: 0, transform: "translateY(20px)" },
+                "100%": { opacity: 1, transform: "translateY(0)" },
+              },
+            },
+            animation: {
+              fadeUp: "fadeUp 0.6s ease both",
+              "fadeUp-d1": "fadeUp 0.6s 0.1s ease both",
+            },
+          },
+        },
+      };
+    </script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <style>
+      body {
+        font-family: "DM Sans", sans-serif;
+      }
+
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: #10a37f !important;
+        box-shadow: 0 0 0 3px rgba(16, 163, 127, 0.15);
+      }
+
+      input:disabled {
+        border-color: transparent !important;
+        box-shadow: none !important;
+      }
+
+      .nav-link::after {
+        content: "";
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: #10a37f;
+        transition: width 0.3s;
+      }
+
+      .nav-link:hover::after {
+        width: 100%;
+      }
+
+      select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%236b7280'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd'/%3E%3C/svg%3E");
+        background-position: right 10px center;
+        background-repeat: no-repeat;
+        background-size: 18px;
+        -webkit-appearance: none;
+        appearance: none;
+      }
+    </style>
+  </head>
+  <body class="bg-[#f0faf6] text-gray-800 min-h-screen flex flex-col">
+    <nav
+      class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm"
+    >
+      <div
+        class="max-w-screen-xl flex items-center justify-between mx-auto px-6 py-4"
+      >
+        <a href="/" class="flex items-center gap-2.5">
+          <div class="bg-primary rounded-xl p-2">
+            <svg
+              class="w-5 h-5 text-white"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+              />
+            </svg>
+          </div>
+          <span class="text-xl font-bold text-gray-900 font-display"
+            >Satva</span
+          >
+        </a>
+      </div>
+    </nav>
+
+    <main class="flex-1 flex items-start justify-center pt-28 pb-16 px-4">
+      <div class="w-full max-w-4xl animate-fadeUp">
+        <div
+          class="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden p-8 sm:p-12"
+        >
+          <div
+            class="mb-8 border-b border-gray-100 pb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+          >
+            <div>
+              <h3 class="font-display text-3xl font-bold text-gray-900 mb-1">
+                Complete Profile
+              </h3>
+              <p class="text-sm text-gray-500">
+                Fill your personal information and contact details.
+              </p>
+            </div>
+          </div>
+
+          <form id="editProfileForm" class="space-y-6" novalidate>
+            <div
+              class="flex flex-col items-center sm:flex-row sm:items-start gap-6 mb-8"
+            >
+              <div class="relative group">
+                <div
+                  class="w-28 h-28 rounded-full overflow-hidden border-4 border-white shadow-lg bg-gray-50 flex items-center justify-center"
+                >
+                  <img
+                    id="profile_preview"
+                    src="https://ui-avatars.com/api/?name=John+Doe&background=10A37F&color=fff&size=150"
+                    alt="Profile Picture"
+                    class="w-full h-full object-cover"
+                  />
+                </div>
+                <label
+                  for="profile_upload"
+                  class="absolute bottom-0 right-0 bg-primary text-white p-2.5 rounded-full cursor-pointer shadow-md hover:bg-primary-dark transition transform group-hover:scale-110"
+                >
+                  <i class="fa-solid fa-camera text-sm"></i>
+                  <input
+                    type="file"
+                    id="profile_upload"
+                    name="profile_upload"
+                    accept="image/*"
+                    class="hidden"
+                  />
+                </label>
+              </div>
+              <div class="text-center sm:text-left mt-2 sm:mt-4">
+                <h4 class="text-base font-semibold text-gray-800">
+                  Profile Photo
+                </h4>
+                <p class="text-xs text-gray-500 mt-1">
+                  Recommended size 400x400px.<br />JPG, PNG, or GIF. Max 5MB.
+                </p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label
+                  for="first_name"
+                  class="block text-sm font-semibold text-gray-700 mb-1.5"
+                  >First Name</label
+                >
+                <input
+                  type="text"
+                  name="first_name"
+                  id="first_name"
+                  required
+                  value=""
+                  placeholder="John"
+                  class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl bg-gray-50 placeholder-gray-400 transition"
+                />
+                <p
+                  id="first_name_error"
+                  class="mt-1 text-xs text-red-500 hidden"
+                ></p>
+              </div>
+
+              <div>
+                <label
+                  for="last_name"
+                  class="block text-sm font-semibold text-gray-700 mb-1.5"
+                  >Last Name</label
+                >
+                <input
+                  type="text"
+                  name="last_name"
+                  id="last_name"
+                  required
+                  value=""
+                  placeholder="Doe"
+                  class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl bg-gray-50 placeholder-gray-400 transition"
+                />
+                <p
+                  id="last_name_error"
+                  class="mt-1 text-xs text-red-500 hidden"
+                ></p>
+              </div>
+
+              <div>
+                <label
+                  for="country_code"
+                  class="block text-sm font-semibold text-gray-700 mb-1.5"
+                  >Country Code</label
+                >
+                <select
+                  id="country_code"
+                  name="country_code"
+                  required
+                  class="w-full pr-10 pl-4 py-3 text-sm border border-gray-200 rounded-xl bg-gray-50 text-gray-700 transition"
+                ></select>
+                <p
+                  id="country_code_error"
+                  class="mt-1 text-xs text-red-500 hidden"
+                ></p>
+              </div>
+
+              <div>
+                <label
+                  for="phone"
+                  class="block text-sm font-semibold text-gray-700 mb-1.5"
+                  >Mobile Number</label
+                >
+                <input
+                  type="text"
+                  name="phone"
+                  id="phone"
+                  required
+                  value=""
+                  class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl bg-gray-50 placeholder-gray-400 transition"
+                />
+                <p
+                  id="phone_error"
+                  class="mt-1 text-xs text-red-500 hidden"
+                ></p>
+              </div>
+
+              <div>
+                <label
+                  for="dob"
+                  class="block text-sm font-semibold text-gray-700 mb-1.5"
+                  >Date of Birth</label
+                >
+                <input
+                  type="date"
+                  name="dob"
+                  id="dob"
+                  required
+                  value=""
+                  class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl bg-gray-50 text-gray-700 transition"
+                />
+                <p id="dob_error" class="mt-1 text-xs text-red-500 hidden"></p>
+              </div>
+
+              <div>
+                <label
+                  for="gender"
+                  class="block text-sm font-semibold text-gray-700 mb-1.5"
+                  >Gender</label
+                >
+                <select
+                  id="gender"
+                  name="gender"
+                  required
+                  class="w-full pr-10 pl-4 py-3 text-sm border border-gray-200 rounded-xl bg-gray-50 text-gray-700 transition"
+                >
+                  <option value="" disabled>Select Gender</option>
+                  <option value="MALE" selected>Male</option>
+                  <option value="FEMALE">Female</option>
+                  <option value="OTHER">Other</option>
+                </select>
+                <p
+                  id="gender_error"
+                  class="mt-1 text-xs text-red-500 hidden"
+                ></p>
+              </div>
+
+              <div class="md:col-span-2 lg:col-span-1">
+                <label
+                  for="blood_group"
+                  class="block text-sm font-semibold text-gray-700 mb-1.5"
+                  >Blood Group</label
+                >
+                <select
+                  id="blood_group"
+                  name="blood_group"
+                  class="w-full pr-10 pl-4 py-3 text-sm border border-gray-200 rounded-xl bg-gray-50 text-gray-700 transition"
+                >
+                  <option value="" disabled>Select Blood Group</option>
+                  <option value="A+">A+</option>
+                  <option value="A-">A-</option>
+                  <option value="B+">B+</option>
+                  <option value="B-">B-</option>
+                  <option value="O+" selected>O+</option>
+                  <option value="O-">O-</option>
+                  <option value="AB+">AB+</option>
+                  <option value="AB-">AB-</option>
+                </select>
+                <p
+                  id="blood_group_error"
+                  class="mt-1 text-xs text-red-500 hidden"
+                ></p>
+              </div>
+
+              <div class="hidden lg:block"></div>
+
+              <div class="md:col-span-2">
+                <label
+                  for="address_1"
+                  class="block text-sm font-semibold text-gray-700 mb-1.5"
+                  >Address Line 1</label
+                >
+                <input
+                  type="text"
+                  name="address_1"
+                  id="address_1"
+                  required
+                  placeholder="Street Address, P.O. Box, Company Name"
+                  value=""
+                  class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl bg-gray-50 placeholder-gray-400 transition"
+                />
+                <p
+                  id="address_1_error"
+                  class="mt-1 text-xs text-red-500 hidden"
+                ></p>
+              </div>
+
+              <div class="md:col-span-2">
+                <label
+                  for="address_2"
+                  class="block text-sm font-semibold text-gray-700 mb-1.5"
+                  >Address Line 2</label
+                >
+                <input
+                  type="text"
+                  name="address_2"
+                  id="address_2"
+                  required
+                  placeholder="Apartment, suite, unit, building, floor, etc."
+                  value=""
+                  class="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl bg-gray-50 placeholder-gray-400 transition"
+                />
+                <p
+                  id="address_2_error"
+                  class="mt-1 text-xs text-red-500 hidden"
+                ></p>
+              </div>
+            </div>
+
+            <div
+              class="pt-6 border-t border-gray-100 flex flex-col sm:flex-row gap-4 justify-end"
+            >
+              <button
+                type="submit"
+                class="w-full sm:w-auto py-3 px-8 bg-primary hover:bg-primary-dark text-white text-sm font-semibold rounded-xl shadow-md transition-all duration-200"
+              >
+                Save Changes
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </main>
+
+    <%- include('../partials/footer.ejs') %>
+
+    <script>
+      document.getElementById("dob").max = new Date()
+        .toISOString()
+        .split("T")[0];
+
+      // Profile Picture Preview functionality
+      const profileUpload = document.getElementById("profile_upload");
+      const profilePreview = document.getElementById("profile_preview");
+
+      profileUpload.addEventListener("change", function (e) {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            profilePreview.src = e.target.result;
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+
+      // Country code dropdown (Same as Register page)
+      fetch("https://restcountries.com/v3.1/all?fields=name,idd")
+        .then((res) => res.json())
+        .then((data) => {
+          const select = document.getElementById("country_code");
+          data
+            .sort((a, b) => a.name.common.localeCompare(b.name.common))
+            .forEach((country) => {
+              const root = country.idd?.root || "";
+              const suffix = country.idd?.suffixes?.[0] || "";
+              const dial = root + suffix;
+              if (!dial) return;
+              const opt = document.createElement("option");
+              opt.value = dial;
+              opt.textContent = `${country.name.common} (${dial})`;
+              // Pre-select India
+              if (country.name.common === "India") opt.selected = true;
+              select.appendChild(opt);
+            });
+        })
+        .catch(() => {
+          // Fallback if API fails
+          const select = document.getElementById("country_code");
+          const opt = document.createElement("option");
+          opt.value = "+91";
+          opt.textContent = "India (+91)";
+          opt.selected = true;
+          select.appendChild(opt);
+        });
+
+      // Validation Script
+      const editForm = document.getElementById("editProfileForm");
+
+      editForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        let isValid = true;
+
+        // Clear previous errors
+        document.querySelectorAll("[id$='_error']").forEach((el) => {
+          el.textContent = "";
+          el.classList.add("hidden");
+        });
+
+        document
+          .querySelectorAll(".border-red-500")
+          .forEach((el) => el.classList.remove("border-red-500"));
+
+        const firstName = document.getElementById("first_name");
+        const lastName = document.getElementById("last_name");
+        const phone = document.getElementById("phone");
+        const dob = document.getElementById("dob");
+        const gender = document.getElementById("gender");
+        const address1 = document.getElementById("address_1");
+        const address2 = document.getElementById("address_2");
+
+        function showError(input, errorId, message) {
+          document.getElementById(errorId).textContent = message;
+          document.getElementById(errorId).classList.remove("hidden");
+          if (input) input.classList.add("border-red-500");
+          isValid = false;
+        }
+
+        if (!firstName.value.trim())
+          showError(firstName, "first_name_error", "First name is required");
+        if (!lastName.value.trim())
+          showError(lastName, "last_name_error", "Last name is required");
+
+        if (!phone.value.trim()) {
+          showError(phone, "phone_error", "Phone number is required");
+        } else if (!/^[0-9]{6,15}$/.test(phone.value.trim())) {
+          showError(phone, "phone_error", "Please enter a valid phone number");
+        }
+
+        if (!dob.value)
+          showError(dob, "dob_error", "Date of birth is required");
+        if (!gender.value)
+          showError(gender, "gender_error", "Please select your gender");
+
+        if (!address1.value.trim())
+          showError(address1, "address_1_error", "Address Line 1 is required");
+        if (!address2.value.trim())
+          showError(address2, "address_2_error", "Address Line 2 is required");
+
+        if (isValid) {
+          console.log("Edit Profile Form Valid");
+
+          // Proceed with fetch API to update profile route
+        }
+      });
+    </script>
+  </body>
+</html>

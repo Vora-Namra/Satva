@@ -1,0 +1,39 @@
+  <nav class="flex items-center justify-between px-6 py-3 bg-white border-b border-gray-200 sticky top-0 z-50">
+    <div class="flex items-center gap-2">
+      <div class="w-9 h-9 bg-green-600 rounded-lg flex items-center justify-center">
+        <i class="ti ti-heart text-white text-lg"></i>
+      </div>
+      <span class="text-base font-semibold text-gray-900">Satva</span>
+    </div>
+    <div class="flex items-center gap-4">
+      <i class="ti ti-bell text-xl text-gray-500 cursor-pointer"></i>
+      <i class="ti ti-user text-xl text-gray-500 cursor-pointer"></i>
+      <button class="flex items-center gap-2 bg-red-500 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-red-600 transition" id="logout-btn">
+        <i class="ti ti-logout text-base"></i>
+        Logout
+      </button>
+    </div>
+  </nav>
+
+
+  <script>
+  document.getElementById("logout-btn").addEventListener("click",async()=>{
+
+    try {
+        const token = localStorage.getItem("accessToken");
+        if (token) {
+            await fetch('/api/v1/auth/logout', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+        }
+    } catch (error) {
+        console.error("Logout failed on server, clearing client session anyway.", error);
+    } finally {
+        localStorage.clear();
+        window.location.href = '/login';
+    }
+  })
+  </script>

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HealthCare – Dr. Michael Chen Profile</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+
+  <!-- ───────────── NAVBAR ───────────── -->
+ <%-include('partials/header.ejs')%>
+
+  <!-- ───────────── MAIN ───────────── -->
+  <main class="max-w-7xl mx-auto px-6 py-8 space-y-6">
+
+    <!-- Breadcrumb -->
+    <nav class="flex items-center gap-2 text-sm text-gray-500">
+      <a href="/doctor/dashboard" class="hover:text-teal-600 transition">Dashboard</a>
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+      </svg>
+      <span class="text-gray-800 font-medium">Doctor Profile</span>
+    </nav>
+
+    <!-- ══════════════════════════════════════
+         HERO CARD  —  Photo + Identity
+         ══════════════════════════════════════ -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <!-- Teal banner -->
+      <div class="h-28  relative">
+        <a href="/doctor/profile/edit">
+          <!-- Edit profile button -->
+          <button
+            class="absolute top-4 right-4 flex items-center gap-1.5 bg-teal-600 bg-opacity-20 hover:bg-opacity-30 text-black text-xs font-medium px-3 py-1.5 rounded-lg transition backdrop-blur-sm">
+            <!-- <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+          </svg> -->
+            Edit Profile
+        </a>
+        </button>
+      </div>
+
+      <div class="px-6 pb-6">
+        <!-- Avatar overlapping banner -->
+        <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 -mt-12 mb-4">
+          <div class="flex items-end gap-4">
+            <!-- Photo -->
+            <div
+              class="w-24 h-24 rounded-2xl border-4 border-white shadow-md bg-teal-50 flex items-center justify-center flex-shrink-0 overflow-hidden">
+              <svg class="w-14 h-14 text-teal-400" fill="none" stroke="currentColor" stroke-width="1.5"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </div>
+            <div class="pb-1">
+              <div class="flex items-center gap-2">
+                <h1 class="text-xl font-bold text-gray-900" id="doctor_name">Dr. Michael Chen</h1>
+                <span
+                  class="inline-flex items-center gap-1 text-xs font-medium text-teal-700 bg-teal-50 border border-teal-200 rounded-full px-2.5 py-0.5">
+                  <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clip-rule="evenodd" />
+                  </svg>
+                  Verified
+                </span>
+              </div>
+              <p class="text-sm text-gray-500 mt-0.5" id="hospital_name2">City Heart Hospital</p>
+              <!-- Doctor ID & Hospital ID chips -->
+              <!-- <div class="flex flex-wrap gap-2 mt-2">
+                <span class="text-xs font-mono text-gray-500 bg-gray-100 rounded px-2 py-0.5">ID: DOC-2024-0042</span>
+                <span class="text-xs font-mono text-gray-500 bg-gray-100 rounded px-2 py-0.5">Hospital: HSP-001</span>
+              </div> -->
+            </div>
+          </div>
+
+          <!-- Consultation fee pill -->
+          <div class="sm:pb-1 flex-shrink-0">
+            <div class="bg-teal-600 rounded-xl px-5 py-3 text-center">
+              <p class="text-white text-opacity-80 text-xs font-medium">Consultation Fee</p>
+              <p class="text-white text-2xl font-bold leading-tight mt-0.5" id="consultation_fee"> </p>
+              <p class="text-white text-opacity-60 text-xs">per visit</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bio -->
+        <p class="text-sm text-gray-600 leading-relaxed border-t border-gray-100 pt-4" id="bio">
+
+        </p>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         STATS ROW  (mirrors dashboard style)
+         ══════════════════════════════════════ -->
+    <!-- <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+      <div class="bg-teal-600 rounded-2xl p-6 flex flex-col justify-between min-h-[110px] shadow-md">
+        <div class="flex items-center justify-between">
+          <span class="text-white text-sm font-medium opacity-80">Experience</span>
+          <svg class="w-6 h-6 text-white opacity-70" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <p class="text-white text-4xl font-bold mt-3 leading-none"><span id="experience_years"></span> <span class="text-xl font-semibold opacity-80">yrs</span></p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-6 flex flex-col justify-between min-h-[110px] shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between">
+          <span class="text-gray-500 text-sm font-medium">Specialties</span>
+          <svg class="w-6 h-6 text-teal-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+          </svg>
+        </div>
+        <p class="text-gray-800 text-4xl font-bold mt-3 leading-none">3</p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-6 flex flex-col justify-between min-h-[110px] shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between">
+          <span class="text-gray-500 text-sm font-medium">Qualifications</span>
+          <svg class="w-6 h-6 text-teal-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
+          </svg>
+        </div>
+        <p class="text-gray-800 text-4xl font-bold mt-3 leading-none">3</p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-6 flex flex-col justify-between min-h-[110px] shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between">
+          <span class="text-gray-500 text-sm font-medium">Consultation Fee</span>
+          <svg class="w-6 h-6 text-teal-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <p class="text-gray-800 text-4xl font-bold mt-3 leading-none">₹800</p>
+      </div>
+
+    </div> -->
+
+    <!-- ══════════════════════════════════════
+         TWO-COLUMN DETAIL GRID
+         ══════════════════════════════════════ -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+      <!-- Specialties -->
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
+        <div class="flex items-center gap-2 border-b border-gray-100 pb-3">
+          <div class="w-8 h-8 bg-teal-50 rounded-lg flex items-center justify-center">
+            <svg class="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+          </div>
+          <h2 class="text-base font-semibold text-gray-900">Specialties</h2>
+        </div>
+        <div class="flex flex-wrap gap-2" id="specialities">
+
+        </div>
+      </div>
+
+      <!-- Doctor & Hospital IDs -->
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
+        <div class="flex items-center gap-2 border-b border-gray-100 pb-3">
+          <div class="w-8 h-8 bg-teal-50 rounded-lg flex items-center justify-center">
+            <svg class="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2" />
+            </svg>
+          </div>
+          <h2 class="text-base font-semibold text-gray-900">Identity Details</h2>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <p class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-1">Doctor ID</p>
+            <p class="text-sm font-semibold text-gray-800 font-mono" id="doctor-id">DOC-2024-0042</p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-1">Hospital ID</p>
+            <p class="text-sm font-semibold text-gray-800 font-mono" id="hospital-id">HSP-001</p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-1">Hospital Name</p>
+            <p class="text-sm font-semibold text-gray-800" id="hospital-name">City Heart Hospital</p>
+          </div>
+          <div>
+            <p class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-1">Experience</p>
+            <p class="text-sm font-semibold text-gray-800" id="experience_years">15 Years</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════
+         QUALIFICATIONS TABLE
+         ══════════════════════════════════════ -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
+      <div class="flex items-center gap-2 border-b border-gray-100 pb-3">
+        <div class="w-8 h-8 bg-teal-50 rounded-lg flex items-center justify-center">
+          <svg class="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+          </svg>
+        </div>
+        <h2 class="text-base font-semibold text-gray-900">Qualifications</h2>
+      </div>
+
+      <!-- Qualification Cards -->
+      <div class="space-y-3" id="qualification">
+
+
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         QUICK ACTIONS
+         ══════════════════════════════════════ -->
+    <!-- <div class="flex flex-wrap gap-3 pb-4">
+      <button class="flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white text-sm font-medium px-5 py-2.5 rounded-xl transition shadow-sm">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+        </svg>
+        Book Appointment
+      </button>
+      <button class="flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-700 text-sm font-medium px-5 py-2.5 rounded-xl border border-gray-200 transition shadow-sm">
+        <svg class="w-4 h-4 text-teal-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+        </svg>
+        Send Message
+      </button>
+      <button class="flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-700 text-sm font-medium px-5 py-2.5 rounded-xl border border-gray-200 transition shadow-sm">
+        <svg class="w-4 h-4 text-teal-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+        View Medical Records
+      </button>
+    </div> -->
+
+  </main>
+
+
+  <script src="/js/doctor-profile.js"></script>
+  <script src="/js/doctor-notification.js"></script>
+</body>
+
+</html>

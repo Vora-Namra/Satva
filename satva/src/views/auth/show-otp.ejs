@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Satva - OTP Verification</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#10A37F",
+            "primary-dark": "#0d8a6a",
+            "primary-light": "#e6f7f3",
+            "bg-page": "#f0faf6",
+            dark: "#0f1923",
+          },
+          fontFamily: {
+            sans: ["DM Sans", "sans-serif"],
+            display: ["Playfair Display", "serif"],
+          },
+        },
+      },
+    };
+  </script>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap"
+    rel="stylesheet"
+  />
+</head>
+
+<body
+  class="min-h-screen bg-gradient-to-br from-primary-light to-white flex items-center justify-center p-5 font-sans"
+>
+  <div
+    class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8"
+  >
+    <!-- Header -->
+    <div class="text-center mb-6">
+      <div class="text-4xl mb-3">🔒</div>
+
+      <h1 class="text-2xl font-bold text-dark">
+        Password Reset OTP
+      </h1>
+
+      <p class="text-sm text-gray-500 mt-1">
+        Secure verification code
+      </p>
+    </div>
+
+    <!-- OTP Box -->
+    <div
+      class="mt-5 border border-gray-200 rounded-xl bg-gray-50 p-5 text-center"
+    >
+      <div
+        class="text-xs uppercase tracking-widest text-gray-500 mb-2"
+      >
+        Your OTP
+      </div>
+
+      <div
+        class="text-4xl font-bold tracking-[0.35em] text-primary"
+      >
+        <%= otp_code %>
+      </div>
+
+      <div class="mt-2 text-xs text-gray-500">
+        Valid for 2 minutes
+      </div>
+    </div>
+
+    <!-- Message -->
+    <div
+      class="mt-5 text-sm text-gray-600 leading-relaxed text-center"
+    >
+      Use this OTP to reset your password.
+      Do not share this code with anyone.
+    </div>
+
+    <!-- CTA -->
+    <a
+      href="/enter-otp"
+      class="block w-full mt-6 text-center bg-primary hover:bg-primary-dark text-white font-semibold py-3 rounded-lg transition-colors duration-200"
+    >
+      Reset Password
+    </a>
+
+    <!-- Footer -->
+    <div
+      class="mt-5 text-xs text-gray-400 text-center"
+    >
+      If you didn’t request this, you can safely ignore this email.
+    </div>
+  </div>
+</body>
+</html>
+```

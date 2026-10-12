@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Add Staff — Satva Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+
+  <script>
+    tailwind.config = {
+      theme: { extend: { colors: { primary: '#10A37F', 'primary-dark': '#0d8a6a' } } }
+    }
+  </script>
+</head>
+<body class="bg-gray-50 font-sans">
+
+  <!-- Navbar -->
+    <div class="max-w-7xl mx-auto px-6 pt-7">
+ <%-include('navbar.ejs') %>
+ </div>
+
+  <main class="max-w-4xl mx-auto px-6 py-10">
+
+    <!-- Back -->
+    <div class="mb-6">
+      <a href="/admin/staffs" class="inline-flex items-center text-sm font-medium text-primary hover:underline gap-1">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+        </svg>
+        Back to Staff
+      </a>
+    </div>
+
+    <div class="mb-8">
+      <h1 class="text-2xl font-bold text-gray-900">Add New Staff</h1>
+      <p class="text-sm text-gray-400 mt-1">Register a new staff member to the hospital</p>
+    </div>
+
+    <form id="add-staff-form" class="space-y-6">
+
+      <!-- Section 1: Account Info -->
+      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+        <h2 class="text-sm font-bold text-primary border-b border-gray-100 pb-3 mb-5 flex items-center gap-2">
+          <span>01</span> Account Information
+        </h2>
+        <div class="grid grid-cols-2 gap-5">
+
+          <div class="flex flex-col gap-1.5">
+            <label class="text-sm font-medium text-gray-700">Email *</label>
+            <input id="f-email" type="email" required placeholder="staff@hospital.com"
+              class="border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition" />
+          </div>
+
+          <div class="flex flex-col gap-1.5">
+            <label class="text-sm font-medium text-gray-700">Password *</label>
+            <input id="f-password" type="password" required placeholder="Min 8 characters"
+              class="border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition" />
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Section 2: Personal Info -->
+      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+        <h2 class="text-sm font-bold text-primary border-b border-gray-100 pb-3 mb-5 flex items-center gap-2">
+          <span>02</span> Personal Information
+        </h2>
+        <div class="grid grid-cols-2 gap-5">
+
+          <div class="flex flex-col gap-1.5">
+            <label class="text-sm font-medium text-gray-700">First Name *</label>
+            <input id="f-first-name" type="text" required placeholder="Gunjan"
+              class="border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition" />
+          </div>
+
+          <div class="flex flex-col gap-1.5">
+            <label class="text-sm font-medium text-gray-700">Last Name *</label>
+            <input id="f-last-name" type="text" required placeholder="Kumari"
+              class="border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition" />
+          </div>
+
+          <div class="flex flex-col gap-1.5">
+            <label class="text-sm font-medium text-gray-700">Gender</label>
+            <select id="f-gender"
+              class="border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary bg-white transition">
+              <option value="">Select Gender</option>
+              <option value="MALE">Male</option>
+              <option value="FEMALE">Female</option>
+              <option value="OTHERS">Other</option>
+            </select>
+          </div>
+
+          <div class="flex flex-col gap-1.5">
+            <label class="text-sm font-medium text-gray-700">Date of Birth</label>
+            <input id="f-dob" type="date"
+              class="border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary transition" />
+          </div>
+
+          <div class="flex flex-col gap-1.5">
+            <label class="text-sm font-medium text-gray-700">Contact Number</label>
+            <input id="f-contact" type="text" placeholder="9999966666"
+              class="border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary transition" />
+          </div>
+
+          <div class="flex flex-col gap-1.5">
+            <label class="text-sm font-medium text-gray-700">Staff Role *</label>
+            <select id="f-role" required
+              class="border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary bg-white transition">
+              <option value="">Select Role</option>
+              <option value="RECEPTIONIST">Receptionist</option>
+              <option value="NURSE">Nurse</option>
+            
+            </select>
+          </div>
+
+          <div class="flex flex-col gap-1.5">
+            <label class="text-sm font-medium text-gray-700">Address Line 1</label>
+            <input id="f-address1" type="text" placeholder="City / Area"
+              class="border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary transition" />
+          </div>
+
+          <div class="flex flex-col gap-1.5">
+            <label class="text-sm font-medium text-gray-700">
+              Address Line 2
+              <span class="text-gray-400 font-normal ml-1">(optional)</span>
+            </label>
+            <input id="f-address2" type="text" placeholder="Landmark, Street..."
+              class="border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary transition placeholder-gray-300" />
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Buttons -->
+      <div class="flex items-center gap-3">
+        <button type="submit" id="submit-btn"
+          class="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white text-sm font-semibold px-6 py-2.5 rounded-lg transition">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+          Add Staff Member
+        </button>
+        <a href="/admin/staff"
+          class="text-sm text-gray-500 border border-gray-200 px-5 py-2.5 rounded-lg hover:bg-gray-50 transition">
+          Cancel
+        </a>
+      </div>
+
+    </form>
+
+  </main>
+
+  <script>
+    const API_BASE = 'http://localhost:3333/api/v1/admin';
+
+    function getToken() {
+      return localStorage.getItem('accessToken') ?? '';
+    }
+
+    document.getElementById('add-staff-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+
+      const submitBtn  = document.getElementById('submit-btn');
+
+      submitBtn.disabled  = true;
+      submitBtn.innerHTML = 'Saving...';
+
+      const payload = {
+        email:          document.getElementById('f-email').value.trim(),
+        password:       document.getElementById('f-password').value,
+        firstName:      document.getElementById('f-first-name').value.trim(),
+        lastName:       document.getElementById('f-last-name').value.trim(),
+        gender:         document.getElementById('f-gender').value        || null,
+        dob:            document.getElementById('f-dob').value           || null,
+        contact_number:  document.getElementById('f-contact').value.trim()  || null,
+        staff_role:      document.getElementById('f-role').value,
+        address_line1:   document.getElementById('f-address1').value.trim() || null,
+        address_line2:   document.getElementById('f-address2').value.trim() || null,
+      };
+
+      console.log('payload:', payload);
+
+      try {
+        const res = await fetch(`${API_BASE}/addStaff`, {
+          method: 'POST',
+          headers: {
+            'Content-Type':  'application/json',
+            'Authorization': `Bearer ${getToken()}`,
+          },
+          body: JSON.stringify(payload),
+        });
+
+        const json = await res.json();
+
+        if (!res.ok) throw new Error(json.message ?? `Error ${res.status}`);
+
+        setFlash('Staff member added successfully!', 'success');
+        window.location.href = 'http://localhost:3333/admin/staffs';
+
+      } catch (err) {
+        showFlash(err.message, 'error');
+        console.error(err);
+      } finally {
+        submitBtn.disabled  = false;
+        submitBtn.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+          Add Staff Member`;
+      }
+    });
+  </script>
+
+<%- include('../error_flash.ejs') %>
+</body>
+</html>

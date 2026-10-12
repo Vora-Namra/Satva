@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Satva — Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module">
+      import "/js/redirect-if-auth.js";
+    </script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#10A37F",
+              "primary-dark": "#0d8a6a",
+              "primary-light": "#e6f7f3",
+              "bg-page": "#f0faf6",
+              dark: "#0f1923",
+            },
+            fontFamily: {
+              sans: ["'DM Sans'", "system-ui", "sans-serif"],
+              display: ["'Playfair Display'", "Georgia", "serif"],
+            },
+            keyframes: {
+              fadeUp: {
+                "0%": { opacity: 0, transform: "translateY(20px)" },
+                "100%": { opacity: 1, transform: "translateY(0)" },
+              },
+            },
+            animation: {
+              fadeUp: "fadeUp 0.6s ease both",
+              "fadeUp-d1": "fadeUp 0.6s 0.1s ease both",
+              "fadeUp-d2": "fadeUp 0.6s 0.2s ease both",
+              "fadeUp-d3": "fadeUp 0.6s 0.3s ease both",
+            },
+          },
+        },
+      };
+    </script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <style>
+      body {
+        font-family: "DM Sans", sans-serif;
+      }
+
+      /* Input focus ring in brand green */
+      input:focus,
+      select:focus {
+        outline: none;
+        border-color: #10a37f !important;
+        box-shadow: 0 0 0 3px rgba(16, 163, 127, 0.15);
+      }
+
+      .hero-blob {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0.18;
+        pointer-events: none;
+      }
+
+      /* Panel decorative pattern */
+      .panel-dots {
+        background-image: radial-gradient(
+          circle,
+          rgba(255, 255, 255, 0.25) 1px,
+          transparent 1px
+        );
+        background-size: 22px 22px;
+      }
+
+      .nav-link::after {
+        content: "";
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: #10a37f;
+        transition: width 0.3s;
+      }
+      .nav-link:hover::after {
+        width: 100%;
+      }
+
+      /* Checkbox accent */
+      input[type="checkbox"]:checked {
+        accent-color: #10a37f;
+      }
+    </style>
+  </head>
+  <body class="bg-[#f0faf6] text-gray-800 min-h-screen flex flex-col">
+    <!-- ===== NAVBAR ===== -->
+
+    <%- include('../partials/header') %>
+
+    <!-- ===== MAIN ===== -->
+    <main class="flex-1 flex items-center justify-center pt-24 pb-16 px-4">
+      <div class="w-full max-w-5xl animate-fadeUp">
+        <div
+          class="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden flex flex-col lg:flex-row min-h-[520px]"
+        >
+          <!-- Left decorative panel -->
+          <div
+            class="relative bg-primary lg:w-2/5 flex flex-col justify-between p-10 overflow-hidden"
+          >
+            <!-- Blobs -->
+            <div
+              class="hero-blob w-64 h-64 bg-emerald-300 -top-16 -right-16"
+            ></div>
+            <div
+              class="hero-blob w-48 h-48 bg-teal-700 bottom-0 -left-12"
+            ></div>
+            <!-- Dot pattern -->
+            <div class="panel-dots absolute inset-0"></div>
+
+            <div class="relative z-10">
+              <div
+                class="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm text-white text-xs font-semibold px-4 py-1.5 rounded-full mb-8"
+              >
+                <span
+                  class="w-2 h-2 rounded-full bg-white animate-pulse inline-block"
+                ></span>
+                Welcome back
+              </div>
+              <h2
+                class="font-display text-4xl font-bold text-white leading-tight mb-4"
+              >
+                Your Health<br />Journey<br />Continues
+              </h2>
+              <p class="text-green-100 text-sm leading-relaxed max-w-xs">
+                Sign in to access your appointments, medical records, and
+                connect with top specialists — all in one secure place.
+              </p>
+            </div>
+
+            <!-- Trust badges -->
+            <div class="relative z-10 space-y-3 mt-8">
+              <div
+                class="flex items-center gap-3 bg-white/10 rounded-xl px-4 py-3"
+              >
+                <div
+                  class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0"
+                >
+                  <svg
+                    class="w-4 h-4 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                    />
+                  </svg>
+                </div>
+                <span class="text-white text-xs font-medium"
+                  >HIPAA Compliant & Secure</span
+                >
+              </div>
+              <div
+                class="flex items-center gap-3 bg-white/10 rounded-xl px-4 py-3"
+              >
+                <div
+                  class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0"
+                >
+                  <svg
+                    class="w-4 h-4 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                    />
+                  </svg>
+                </div>
+                <span class="text-white text-xs font-medium"
+                  >Trusted by 10,000+ patients</span
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- Right form panel -->
+          <div
+            class="flex-1 flex flex-col justify-center px-8 py-10 sm:px-12 animate-fadeUp-d1"
+          >
+            <div class="mb-8">
+              <h3 class="font-display text-3xl font-bold text-gray-900 mb-1">
+                Sign In
+              </h3>
+              <p class="text-sm text-gray-500">
+                Enter your credentials to access your account
+              </p>
+            </div>
+
+            <form class="space-y-5" id="loginform" novalidate>
+              <!-- Email -->
+              <div>
+                <label
+                  for="email"
+                  class="block text-sm font-semibold text-gray-700 mb-1.5"
+                  >Email Address</label
+                >
+                <div class="relative">
+                  <span
+                    class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none"
+                  >
+                    <svg
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                      />
+                    </svg>
+                  </span>
+                  <input
+                    name="email"
+                    id="email"
+                    type="email"
+                    required
+                    placeholder="john@example.com"
+                    class="w-full pl-10 pr-4 py-3 text-sm border border-gray-200 rounded-xl bg-gray-50 placeholder-gray-400 transition"
+                  />
+                </div>
+                <p id="emailError" class="mt-1 text-sm text-red-500 hidden"></p>
+              </div>
+
+              <!-- Password -->
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <label
+                    for="password"
+                    class="block text-sm font-semibold text-gray-700"
+                    >Password</label
+                  >
+                  <a
+                    href="forgot-password"
+                    class="text-xs text-primary hover:underline font-medium"
+                    >Forgot password?</a
+                  >
+                </div>
+                <div class="relative">
+                  <span
+                    class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none"
+                  >
+                    <svg
+                      class="w-4 h-4"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                      />
+                    </svg>
+                  </span>
+                  <input
+                    type="password"
+                    name="password"
+                    id="password"
+                    required
+                    placeholder="••••••••"
+                    class="w-full pl-10 pr-10 py-3 text-sm border border-gray-200 rounded-xl bg-gray-50 placeholder-gray-400 transition"
+                  />
+
+                  <button
+                    type="button"
+                    id="togglePassword"
+                    class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 hover:text-gray-600"
+                  >
+                    <i class="fa-regular fa-eye text-sm" id="eyeIcon"></i>
+                  </button>
+                </div>
+                <p
+                  id="passwordError"
+                  class="mt-1 text-sm text-red-500 hidden"
+                ></p>
+              </div>
+
+              <!-- Submit -->
+              <button
+                type="submit"
+                class="w-full py-3 px-4 bg-primary hover:bg-primary-dark text-white text-sm font-semibold rounded-xl shadow-md transition-all duration-200 mt-2"
+              >
+                Sign In to Satva
+              </button>
+
+              <!-- Divider -->
+              <div class="flex items-center gap-3 py-1">
+                <div class="flex-1 border-t border-gray-200"></div>
+                <span class="text-xs text-gray-400 font-medium"
+                  >or continue with</span
+                >
+                <div class="flex-1 border-t border-gray-200"></div>
+              </div>
+
+              <!-- Google -->
+              <button
+                type="button"
+                onclick="window.location.href = '/api/v1/auth/google'"
+                class="w-full flex items-center justify-center gap-2.5 py-3 px-4 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 text-sm font-medium text-gray-700 transition shadow-sm"
+              >
+                <svg
+                  class="w-4 h-4"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                    fill="#4285F4"
+                  />
+                  <path
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    fill="#34A853"
+                  />
+                  <path
+                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                    fill="#FBBC05"
+                  />
+                  <path
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                    fill="#EA4335"
+                  />
+                </svg>
+                Continue with Google
+              </button>
+
+              <!-- Register link -->
+              <p class="text-sm text-gray-500 text-center">
+                Don't have an account?
+                <a
+                  href="/register"
+                  class="text-primary font-semibold hover:underline ml-1"
+                  >Create one →</a
+                >
+              </p>
+            </form>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="bg-[#0f1923] text-gray-400 py-10 px-4">
+      <div
+        class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 pb-8 border-b border-gray-700"
+      >
+        <div>
+          <div class="flex items-center gap-2 mb-3">
+            <div class="bg-primary rounded-lg p-1.5">
+              <svg
+                class="w-4 h-4 text-white"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                />
+              </svg>
+            </div>
+            <span class="text-white font-bold font-display">Satva</span>
+          </div>
+          <p class="text-xs text-gray-500 leading-relaxed">
+            Your trusted partner for quality healthcare, anytime and anywhere.
+          </p>
+        </div>
+        <div>
+          <h4 class="text-white text-sm font-semibold mb-3">Quick Links</h4>
+          <ul class="space-y-2 text-xs">
+            <li><a href="/" class="hover:text-primary transition">Home</a></li>
+            <li>
+              <a href="/doctors" class="hover:text-primary transition"
+                >Doctors</a
+              >
+            </li>
+            <li>
+              <a href="/about" class="hover:text-primary transition"
+                >About Us</a
+              >
+            </li>
+            <li>
+              <a href="/contact" class="hover:text-primary transition"
+                >Contact</a
+              >
+            </li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-white text-sm font-semibold mb-3">Specialties</h4>
+          <ul class="space-y-2 text-xs">
+            <li>
+              <a href="/doctors" class="hover:text-primary transition"
+                >Cardiology</a
+              >
+            </li>
+            <li>
+              <a href="/doctors" class="hover:text-primary transition"
+                >Neurology</a
+              >
+            </li>
+            <li>
+              <a href="/doctors" class="hover:text-primary transition"
+                >Dermatology</a
+              >
+            </li>
+            <li>
+              <a href="/doctors" class="hover:text-primary transition"
+                >Pediatrics</a
+              >
+            </li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="text-white text-sm font-semibold mb-3">Contact</h4>
+          <ul class="space-y-2 text-xs">
+            <li class="flex items-center gap-2">
+              <svg
+                class="w-3.5 h-3.5 text-primary flex-shrink-0"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                />
+              </svg>
+              hello@satva.health
+            </li>
+            <li class="flex items-center gap-2">
+              <svg
+                class="w-3.5 h-3.5 text-primary flex-shrink-0"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                />
+              </svg>
+              +91 98765 43210
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div
+        class="max-w-5xl mx-auto pt-6 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-gray-600"
+      >
+        <p>© 2026 Satva Health. All rights reserved.</p>
+        <p>HIPAA Compliant · Secure & Encrypted</p>
+      </div>
+    </footer>
+
+    <script>
+      // Mobile menu toggle
+      // document.getElementById("menuBtn").addEventListener("click", () => {
+      //   document.getElementById("mobileMenu").classList.toggle("hidden");
+      // });
+
+      // Password visibility toggle
+      const togglePassword = document.getElementById("togglePassword");
+      const passwordInput = document.getElementById("password");
+      const eyeIcon = document.getElementById("eyeIcon");
+
+      togglePassword.addEventListener("click", () => {
+        const isPassword = passwordInput.type === "password";
+        passwordInput.type = isPassword ? "text" : "password";
+        eyeIcon.className = isPassword
+          ? "fa-regular fa-eye-slash text-sm"
+          : "fa-regular fa-eye text-sm";
+      });
+    </script>
+
+    <!--! Validation Script  -->
+    <script>
+      // Google Auth Token Handler
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlToken = urlParams.get('token');
+      if (urlToken) {
+        localStorage.setItem("accessToken", urlToken);
+        localStorage.removeItem("is_profile_updated");
+        window.history.replaceState({}, document.title, "/login");
+        
+        // Use the generic check-status endpoint to determine role and redirect
+        fetch("/api/v1/auth/check-status", {
+          headers: { "Authorization": `Bearer ${urlToken}` }
+        })
+        .then(res => {
+          if (!res.ok) {
+            // If token is invalid/expired, clear storage and do nothing.
+            localStorage.clear();
+            throw new Error('Invalid token');
+          }
+          return res.json();
+        })
+        .then(authStatus => {
+          const userRole = authStatus.data?.role;
+          if (!userRole) {
+            localStorage.clear();
+            return;
+          }
+
+          localStorage.setItem("role", userRole);
+
+          if (userRole === 'PATIENT') {
+            // For patients, check if profile is complete before redirecting
+            return fetch("/api/v1/patient/profile", {
+              headers: { "Authorization": `Bearer ${urlToken}` }
+            }).then(res => res.json()).then(profile => {
+              if (profile.data && profile.data.isProfileUpdated === false) {
+                localStorage.setItem("is_profile_updated", "false");
+                window.location.href = "/patient/profile";
+              } else {
+                localStorage.setItem("is_profile_updated", "true");
+                window.location.href = "/patient/dashboard";
+              }
+            });
+          } else {
+            // For other roles, redirect directly to their dashboard
+            const dashboards = {
+              DOCTOR: "/doctor/dashboard",
+              STAFF: "/staff/dashboard",
+              ADMIN: "/admin/dashboard",
+              SUPER_ADMIN: "/super-admin/dashboard"
+            };
+            window.location.href = dashboards[userRole] || "/login";
+          }
+        })
+        .catch((err) => {
+          console.error("Google auth redirect error:", err.message);
+          // Fallback: if anything fails, clear storage and user stays on login page.
+          localStorage.clear();
+        });
+      }
+
+      const loginForm = document.getElementById("loginform");
+      const email = document.getElementById("email");
+      const password = document.getElementById("password");
+
+      const emailError = document.getElementById("emailError");
+      const passwordError = document.getElementById("passwordError");
+
+      loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        let isValid = true;
+
+        // Reset errors
+        emailError.classList.add("hidden");
+        passwordError.classList.add("hidden");
+
+        email.classList.remove("border-red-500");
+        password.classList.remove("border-red-500");
+
+        // Email validation
+        if (!email.value.trim()) {
+          emailError.textContent = "Email address is required";
+          emailError.classList.remove("hidden");
+          email.classList.add("border-red-500");
+          isValid = false;
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) {
+          emailError.textContent = "Please enter a valid email address";
+          emailError.classList.remove("hidden");
+          email.classList.add("border-red-500");
+          isValid = false;
+        }
+
+        // Password validation
+        if (!password.value.trim()) {
+          passwordError.textContent = "Password is required";
+          passwordError.classList.remove("hidden");
+          password.classList.add("border-red-500");
+          isValid = false;
+        } else if (password.value.length < 8) {
+          passwordError.textContent = "Password must be at least 8 characters";
+          passwordError.classList.remove("hidden");
+          password.classList.add("border-red-500");
+          isValid = false;
+        } else if (
+          !/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/.test(
+            password.value,
+          )
+        ) {
+          passwordError.textContent =
+            "Password shoud contain one lowercase , uppercase , digit and special symbol";
+          passwordError.classList.remove("hidden");
+          password.classList.add("border-red-500");
+          isValid = false;
+        }
+
+        if (!isValid) {
+          e.preventDefault();
+        } else {
+          try {
+            const response = await fetch("/api/v1/auth/login", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              credentials: "include",
+              body: JSON.stringify({
+                email: email.value.trim(),
+                password: password.value,
+              }),
+            });
+
+            const resp = await response.json();
+            if (!response.ok) {
+              alert(data.message);
+              return;
+            }
+            console.log(resp)
+            const data = resp.data;
+            const user = data.user;
+            const role = user.role;
+            const token = data.accessToken;
+            localStorage.setItem("accessToken", token);
+            if(role === 'PATIENT'){
+              localStorage.setItem("role", role);
+              window.location.href = "/patient/dashboard";
+            }else if(role === 'DOCTOR'){
+              localStorage.setItem("role", role);
+              window.location.href = "/doctor/dashboard";
+            }else if(role === 'STAFF'){
+              localStorage.setItem("role",role);
+              window.location.href = "/staff/doctors"
+            }
+          }
+          catch (error) {
+            console.error(error);
+            alert("Something went wrong");
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Satva — Super Admin Portal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#10A37F",
+            "primary-dark": "#0d8a6a",
+            "primary-light": "#e6f7f3",
+            "bg-page": "#f0faf6",
+            dark: "#0f1923",
+          },
+          fontFamily: {
+            sans: ["'DM Sans'", "system-ui", "sans-serif"],
+            display: ["'Playfair Display'", "Georgia", "serif"],
+          },
+          keyframes: {
+            fadeUp: {
+              "0%": { opacity: 0, transform: "translateY(20px)" },
+              "100%": { opacity: 1, transform: "translateY(0)" },
+            },
+          },
+          animation: {
+            fadeUp: "fadeUp 0.6s ease both",
+            "fadeUp-d1": "fadeUp 0.6s 0.1s ease both",
+            "fadeUp-d2": "fadeUp 0.6s 0.2s ease both",
+            "fadeUp-d3": "fadeUp 0.6s 0.3s ease both",
+          },
+        },
+      },
+    };
+  </script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    body {
+      font-family: "DM Sans", sans-serif;
+    }
+
+    /* Input focus ring in brand green */
+    input:focus {
+      outline: none;
+      border-color: #10a37f !important;
+      box-shadow: 0 0 0 3px rgba(16, 163, 127, 0.15);
+    }
+
+    .hero-blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.15;
+      pointer-events: none;
+    }
+
+    /* Panel decorative pattern */
+    .panel-dots {
+      background-image: radial-gradient(circle,
+          rgba(255, 255, 255, 0.15) 1px,
+          transparent 1px);
+      background-size: 22px 22px;
+    }
+  </style>
+</head>
+
+<body class="bg-[#f0faf6] text-gray-800 min-h-screen flex flex-col">
+  <nav class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm">
+    <div class="max-w-screen-xl flex items-center justify-between mx-auto px-6 py-4">
+      <div class="flex items-center gap-4">
+        <a href="/" class="flex items-center gap-2.5">
+          <div class="bg-primary rounded-xl p-2">
+            <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path
+                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+          </div>
+          <span class="text-xl font-bold text-gray-900 font-display">Satva</span>
+        </a>
+        <span class="hidden sm:inline-block border-l border-gray-300 h-5"></span>
+        <span class="hidden sm:inline-block text-sm font-semibold text-primary uppercase tracking-wider">
+          Admin Portal
+        </span>
+      </div>
+    </div>
+  </nav>
+
+  <main class="flex-1 flex items-center justify-center pt-24 pb-16 px-4">
+    <div class="w-full max-w-5xl animate-fadeUp">
+      <div
+        class="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden flex flex-col lg:flex-row min-h-[520px]">
+        <div class="relative bg-primary lg:w-2/5 flex flex-col justify-between p-10 overflow-hidden">
+          <div class="hero-blob w-64 h-64 bg-primary -top-16 -right-16"></div>
+          <div class="hero-blob w-48 h-48 bg-emerald-600 bottom-0 -left-12"></div>
+          <div class="panel-dots absolute inset-0"></div>
+
+          <div class="relative z-10">
+            <div
+              class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/10 text-gray-300 text-xs font-semibold px-4 py-1.5 rounded-full mb-8">
+              <i class="fa-solid fa-shield-halved text-white"></i>
+            </div>
+            <h2 class="font-display text-4xl font-bold text-white leading-tight mb-4">
+              Admin<br />Login
+            </h2>
+            <p class="text-white text-sm leading-relaxed max-w-xs">
+              Manage platform configurations, and oversee user roles.
+              Authorized personnel only.
+            </p>
+          </div>
+
+          <div class="relative z-10 space-y-3 mt-8">
+            <div class="flex items-center gap-3 bg-white/5 border border-white/5 rounded-xl px-4 py-3">
+              <div class="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
+                <i class="fa-solid fa-fingerprint text-white text-sm"></i>
+              </div>
+              <span class="text-white text-xs font-medium">Strict Identity Verification</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex-1 flex flex-col justify-center px-8 py-10 sm:px-12 animate-fadeUp-d1">
+          <div class="mb-8">
+            <h3 class="font-display text-3xl font-bold text-gray-900 mb-1">
+              Admin Authentication
+            </h3>
+            <p class="text-sm text-gray-500">
+              Enter your administrative credentials to proceed
+            </p>
+          </div>
+
+          <form class="space-y-5" id="adminLoginForm" novalidate>
+            <div>
+              <label for="email" class="block text-sm font-semibold text-gray-700 mb-1.5">Admin Email Address</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none">
+                  <i class="fa-solid fa-envelope text-sm"></i>
+                </span>
+                <input name="email" id="email" type="email" required placeholder="admin@satva.health"
+                  class="w-full pl-10 pr-4 py-3 text-sm border border-gray-200 rounded-xl bg-gray-50 placeholder-gray-400 transition" />
+              </div>
+              <p id="emailError" class="mt-1 text-sm text-red-500 hidden"></p>
+            </div>
+
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <label for="password" class="block text-sm font-semibold text-gray-700">Password</label>
+              </div>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-gray-400 pointer-events-none">
+                  <i class="fa-solid fa-lock text-sm"></i>
+                </span>
+                <input type="password" name="password" id="password" required placeholder="••••••••"
+                  class="w-full pl-10 pr-10 py-3 text-sm border border-gray-200 rounded-xl bg-gray-50 placeholder-gray-400 transition" />
+
+                <button type="button" id="togglePassword"
+                  class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-gray-400 hover:text-gray-600 focus:outline-none">
+                  <i class="fa-regular fa-eye text-sm" id="eyeIcon"></i>
+                </button>
+              </div>
+              <p id="passwordError" class="mt-1 text-sm text-red-500 hidden"></p>
+            </div>
+
+            <button type="submit"
+              class="w-full py-3 px-4 bg-dark hover:bg-gray-800 text-white text-sm font-semibold rounded-xl shadow-md transition-all duration-200 mt-4 flex items-center justify-center gap-2">
+              Authenticate & Enter
+              <i class="fa-solid fa-arrow-right-to-bracket"></i>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="py-6 px-4">
+    <div
+      class="max-w-5xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-gray-400 font-medium">
+      <p>© 2026 Satva Health Systems.</p>
+    </div>
+  </footer>
+
+  <script>
+    // Password visibility toggle
+    const togglePassword = document.getElementById("togglePassword");
+    const passwordInput = document.getElementById("password");
+    const eyeIcon = document.getElementById("eyeIcon");
+
+    togglePassword.addEventListener("click", () => {
+      const isPassword = passwordInput.type === "password";
+      passwordInput.type = isPassword ? "text" : "password";
+      eyeIcon.className = isPassword
+        ? "fa-regular fa-eye-slash text-sm"
+        : "fa-regular fa-eye text-sm";
+    });
+  </script>
+
+  <!-- ! including error flash file -->
+  <%- include("../error_flash") %>
+
+    <script>
+      const loginForm = document.getElementById("adminLoginForm");
+      const email = document.getElementById("email");
+      const password = document.getElementById("password");
+
+      const emailError = document.getElementById("emailError");
+      const passwordError = document.getElementById("passwordError");
+
+      loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        let isValid = true;
+
+        // Reset errors
+        emailError.classList.add("hidden");
+        passwordError.classList.add("hidden");
+
+        email.classList.remove("border-red-500");
+        password.classList.remove("border-red-500");
+
+        // Email validation
+        if (!email.value.trim()) {
+          emailError.textContent = "Admin email address is required";
+          emailError.classList.remove("hidden");
+          email.classList.add("border-red-500");
+          isValid = false;
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim())) {
+          emailError.textContent = "Please enter a valid email address";
+          emailError.classList.remove("hidden");
+          email.classList.add("border-red-500");
+          isValid = false;
+        }
+
+        // Password validation
+        if (!password.value.trim()) {
+          passwordError.textContent = "Password is required";
+          passwordError.classList.remove("hidden");
+          password.classList.add("border-red-500");
+          isValid = false;
+        } else if (password.value.length < 8) {
+          passwordError.textContent = "Passkey must be at least 8 characters";
+          passwordError.classList.remove("hidden");
+          password.classList.add("border-red-500");
+          isValid = false;
+        } else if (
+          !/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/.test(
+            password.value,
+          )
+        ) {
+          passwordError.textContent =
+            "Passkey should contain at least one lowercase, uppercase, digit, and special symbol";
+          passwordError.classList.remove("hidden");
+          password.classList.add("border-red-500");
+          isValid = false;
+        }
+
+        if (!isValid) {
+          e.preventDefault();
+        } else {
+          const formData = new FormData(e.target);
+          const formBody = Object.fromEntries(formData);
+
+          const res = await fetch("/api/v1/auth/login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formBody),
+          });
+
+          const data = await res.json();
+          if (res.ok) {
+            setFlash(data.message, "success");
+            console.log(data);
+
+
+            const role = data.data.user.role;
+            if (role == "SUPER_ADMIN") {
+              location.href = "/super-admin/dashboard";
+            }
+            else if (role == "ADMIN") {
+              localStorage.setItem('accessToken',data.data.accessToken)
+              localStorage.setItem('role',role)
+              location.href = "/admin/doctors";
+            }
+
+          } else {
+            showFlash(data.message, "error");
+          }
+        }
+      });
+    </script>
+</body>
+
+</html>

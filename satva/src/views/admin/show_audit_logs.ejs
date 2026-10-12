@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Audit Log — Satva Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+</head>
+<body class="bg-white font-sans">
+
+  <!-- Navbar -->
+  <div class="max-w-7xl mx-auto px-6 pt-7">
+ <%- include('navbar.ejs') %>
+ </div>
+
+  <div class="max-w-7xl mx-auto px-6 pt-7">
+
+    <!-- Page Header -->
+    <h1 class="text-2xl font-medium text-gray-900 mb-1">Admin Dashboard</h1>
+    <p class="text-sm text-gray-500 mb-6">System overview and management</p>
+
+      <!-- stats -->
+
+   <%- include('stats.ejs') %>
+
+    <!-- Tabs -->
+   <%-include('tabs.ejs')%>
+
+
+    <!-- Audit Log Card -->
+    <div class="border border-gray-200 rounded-xl mb-6">
+
+      <!-- Card Header -->
+      <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+        <h2 class="text-base font-medium text-gray-900">System Audit Log</h2>
+        <div class="flex items-center gap-2">
+
+          <!-- Action filter -->
+          <select
+            id="filter-action"
+            onchange="applyFilters()"
+            class="text-sm border border-gray-200 rounded-lg px-3 py-1.5 text-gray-700 outline-none focus:border-green-500 bg-white"
+          >
+            <option value="">All Actions</option>
+            <option value="ADMIN_LOGIN">Admin Login</option>
+            <option value="DOCTOR_LOGIN">Doctor Login</option>
+            <option value="PATIENT_LOGIN">Patient Login</option>
+            <option value="CREATE_DOCTOR">Create Doctor</option>
+            <option value="UPDATE_DOCTOR">Update Doctor</option>
+            <option value="DEACTIVATE_DOCTOR">Deactivate Doctor</option>
+            <option value="BOOK_APPOINTMENT">Book Appointment</option>
+            <option value="CANCEL_APPOINTMENT">Cancel Appointment</option>
+            <option value="COMPLETE_APPOINTMENT">Complete Appointment</option>
+            <option value="CREATE_MEDICAL_RECORD">Create Medical Record</option>
+            <option value="UPDATE_PROFILE">Update Profile</option>
+          </select>
+
+          <!-- Date range filter -->
+          <select
+            id="filter-range"
+            onchange="applyFilters()"
+            class="text-sm border border-gray-200 rounded-lg px-3 py-1.5 text-gray-700 outline-none focus:border-green-500 bg-white"
+          >
+            <option value="1">Last 24 Hours</option>
+            <option value="7">Last 7 Days</option>
+            <option value="30">Last 30 Days</option>
+            <option value="">All Time</option>
+          </select>
+
+          <!-- Export -->
+          <button
+            onclick="exportCSV()"
+            class="flex items-center gap-2 bg-green-600 text-white text-sm font-medium px-4 py-1.5 rounded-lg hover:bg-green-700 transition"
+          >
+            <i class="ti ti-download text-base"></i>
+            Export Log
+          </button>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm border-collapse">
+          <thead>
+            <tr class="bg-gray-50 border-b border-gray-100">
+              <th class="text-left px-5 py-3 font-medium text-gray-600">Timestamp</th>
+              <th class="text-left px-5 py-3 font-medium text-gray-600">User</th>
+              <th class="text-left px-5 py-3 font-medium text-gray-600">Action</th>
+              <th class="text-left px-5 py-3 font-medium text-gray-600">Target Entity</th>
+              <th class="text-left px-5 py-3 font-medium text-gray-600">IP Address</th>
+              <th class="text-left px-5 py-3 font-medium text-gray-600">Role</th>
+            </tr>
+          </thead>
+          <tbody id="audit-tbody"></tbody>
+        </table>
+      </div>
+
+      <!-- Loading -->
+      <div id="loading-state" class="flex flex-col items-center justify-center py-14 gap-3">
+        <i class="ti ti-loader-2 text-2xl text-green-600 animate-spin"></i>
+        <p class="text-sm text-gray-400">Loading audit logs...</p>
+      </div>
+
+      <!-- Error -->
+      <div id="error-state" class="hidden flex-col items-center justify-center py-14 gap-2">
+        <i class="ti ti-alert-circle text-2xl text-red-400"></i>
+        <p class="text-sm font-medium text-gray-700">Failed to load audit logs</p>
+        <p id="error-msg" class="text-xs text-gray-400"></p>
+        <button onclick="loadLogs()" class="mt-1 text-sm text-green-600 hover:underline">Retry</button>
+      </div>
+
+      <!-- Empty -->
+      <div id="empty-state" class="hidden flex-col items-center justify-center py-14 gap-2">
+        <i class="ti ti-clipboard-off text-2xl text-gray-300"></i>
+        <p class="text-sm text-gray-400">No audit logs found</p>
+      </div>
+
+      <!-- Footer: count + pagination -->
+      <div id="table-footer" class="hidden items-center justify-between px-5 py-3.5 border-t border-gray-100">
+        <p id="pagination-info" class="text-sm text-gray-500"></p>
+        <div class="flex items-center gap-1" id="pagination-buttons"></div>
+      </div>
+    </div>
+
+    <!-- Bottom summary cards -->
+    <div class="grid grid-cols-4 gap-4 mb-8">
+      <div class="border border-gray-200 rounded-xl p-5">
+        <p class="text-xs text-gray-500 mb-2">Total Activities (24h)</p>
+        <p id="stat-total" class="text-2xl font-medium text-gray-900">—</p>
+      </div>
+      <div class="border border-gray-200 rounded-xl p-5">
+        <p class="text-xs text-gray-500 mb-2">Failed Login Attempts</p>
+        <p id="stat-failed" class="text-2xl font-medium text-red-500">—</p>
+      </div>
+      <div class="border border-gray-200 rounded-xl p-5">
+        <p class="text-xs text-gray-500 mb-2">Records Modified</p>
+        <p id="stat-modified" class="text-2xl font-medium text-gray-900">—</p>
+      </div>
+      <div class="border border-gray-200 rounded-xl p-5">
+        <p class="text-xs text-gray-500 mb-2">Settings Changes</p>
+        <p id="stat-settings" class="text-2xl font-medium text-gray-900">—</p>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // ─── CONFIG ────────────
+    const API_BASE = 'http://localhost:3333/api/v1/admin';
+
+    const PAGE_SIZE = 8;
+    let currentPage = 1;
+    let totalRecords = 0;
+    let cachedRows   = [];
+
+    // ─── HELPERS ─────────────────────────────────────────────────────────────
+    function formatDate(dateStr) {
+      if (!dateStr) return '—';
+      return new Date(dateStr).toLocaleString('en-US', {
+        month: 'short', day: 'numeric', year: 'numeric',
+        hour: 'numeric', minute: '2-digit', hour12: true
+      });
+    }
+
+    function roleClass(role) {
+      return {
+        ADMIN:   'bg-purple-100 text-purple-700',
+        DOCTOR:  'bg-blue-100   text-blue-700',
+        PATIENT: 'bg-teal-100   text-teal-700',
+      }[role?.toUpperCase()] ?? 'bg-gray-100 text-gray-600';
+    }
+
+    function actionIcon(action) {
+      const map = {
+        LOGIN:       'ti-login',
+        CREATE:      'ti-plus',
+        UPDATE:      'ti-edit',
+        DEACTIVATE:  'ti-user-off',
+        CANCEL:      'ti-x',
+        COMPLETE:    'ti-check',
+        BOOK:        'ti-calendar-plus',
+        APPLY:       'ti-beach',
+        VIEW:        'ti-eye',
+      };
+      const key = Object.keys(map).find(k => action?.toUpperCase().includes(k));
+      return map[key] ?? 'ti-activity';
+    }
+
+    function showState(state) {
+      ['loading-state', 'error-state', 'empty-state'].forEach(id => {
+        const el = document.getElementById(id);
+        el.classList.add('hidden');
+        el.classList.remove('flex');
+      });
+      document.getElementById('audit-tbody').innerHTML = '';
+      document.getElementById('table-footer').classList.add('hidden');
+      document.getElementById('table-footer').classList.remove('flex');
+      if (state) {
+        const el = document.getElementById(state);
+        el.classList.remove('hidden');
+        el.classList.add('flex');
+      }
+    }
+
+    // ─── RENDER ROWS ─────────────────────────────────────────────────────────
+    function renderRows(logs) {
+      const tbody = document.getElementById('audit-tbody');
+      tbody.innerHTML = logs.map(log => `
+        <tr class="border-t border-gray-100 hover:bg-gray-50 transition">
+          <td class="px-5 py-3 text-gray-500 whitespace-nowrap">${formatDate(log.created_at)}</td>
+          <td class="px-5 py-3 font-medium text-gray-900">${log.performed_by_name ?? '—'}</td>
+          <td class="px-5 py-3">
+            <div class="flex items-center gap-1.5 text-gray-700">
+              <i class="ti ${actionIcon(log.action)} text-gray-400 text-base"></i>
+              ${formatAction(log.action)}
+            </div>
+          </td>
+          <td class="px-5 py-3 text-gray-500">
+            ${log.entity_name ? `${capitalize(log.entity_name)}: <span class="text-gray-700">${log.entity_id ?? ''}</span>` : '—'}
+          </td>
+          <td class="px-5 py-3 font-mono text-xs text-gray-500">${log.ip_address ?? '—'}</td>
+          <td class="px-5 py-3">
+            <span class="text-xs font-medium px-2.5 py-1 rounded-full ${roleClass(log.performed_by_role)}">
+              ${capitalize(log.performed_by_role ?? 'Unknown')}
+            </span>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function formatAction(action) {
+      if (!action) return '—';
+      return action.split('_').map(w => w[0] + w.slice(1).toLowerCase()).join(' ');
+    }
+
+    function capitalize(str) {
+      if (!str) return '—';
+      return str[0].toUpperCase() + str.slice(1).toLowerCase();
+    }
+
+  
+    // ─── PAGINATION ──────────────────────────────────────────────────────────
+    function renderPagination() {
+      const totalPages = Math.ceil(totalRecords / PAGE_SIZE);
+      const start = (currentPage - 1) * PAGE_SIZE + 1;
+      const end   = Math.min(currentPage * PAGE_SIZE, totalRecords);
+
+      document.getElementById('pagination-info').textContent =
+        `Showing ${start}–${end} of ${totalRecords.toLocaleString()} entries`;
+
+      const container = document.getElementById('pagination-buttons');
+      let html = `
+        <button
+          onclick="changePage(${currentPage - 1})"
+          ${currentPage === 1 ? 'disabled' : ''}
+          class="px-3 py-1 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+        >Previous</button>
+      `;
+
+      // page number buttons — show up to 5
+      const range = pagesToShow(currentPage, totalPages);
+      range.forEach(p => {
+        if (p === '...') {
+          html += `<span class="px-2 text-gray-400 text-sm">...</span>`;
+        } else {
+          html += `
+            <button
+              onclick="changePage(${p})"
+              class="px-3 py-1 text-sm border rounded-lg transition
+                ${p === currentPage
+                  ? 'bg-green-600 text-white border-green-600'
+                  : 'border-gray-200 hover:bg-gray-50 text-gray-700'
+                }"
+            >${p}</button>
+          `;
+        }
+      });
+
+      html += `
+        <button
+          onclick="changePage(${currentPage + 1})"
+          ${currentPage >= totalPages ? 'disabled' : ''}
+          class="px-3 py-1 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition"
+        >Next</button>
+      `;
+
+      container.innerHTML = html;
+
+      const footer = document.getElementById('table-footer');
+      footer.classList.remove('hidden');
+      footer.classList.add('flex');
+    }
+
+    function pagesToShow(current, total) {
+      if (total <= 5) return Array.from({ length: total }, (_, i) => i + 1);
+      if (current <= 3) return [1, 2, 3, '...', total];
+      if (current >= total - 2) return [1, '...', total - 2, total - 1, total];
+      return [1, '...', current, '...', total];
+    }
+
+    function changePage(page) {
+      const totalPages = Math.ceil(totalRecords / PAGE_SIZE);
+      if (page < 1 || page > totalPages) return;
+      currentPage = page;
+      loadLogs();
+    }
+
+    // ─── FILTERS ─────────────────────────────────────────────────────────────
+    function applyFilters() {
+      currentPage = 1;
+      loadLogs();
+    }
+
+    function getFromDate() {
+      const days = document.getElementById('filter-range').value;
+      if (!days) return '';
+      const d = new Date();
+      d.setDate(d.getDate() - Number(days));
+      return d.toISOString().split('T')[0];
+    }
+
+    // ─── FETCH LOGS ──────────────────────────────────────────────────────────
+    async function loadLogs() {
+      showState('loading-state');
+
+      const action    = document.getElementById('filter-action').value;
+      const from_date = getFromDate();
+
+      try {
+        const url = new URL(`${API_BASE}/fetchAuditLogs`);
+        url.searchParams.set('page',  currentPage);
+        url.searchParams.set('limit', PAGE_SIZE);
+        if (action)    url.searchParams.set('action',    action);
+        if (from_date) url.searchParams.set('from_date', from_date);
+
+        const accessToken = localStorage.getItem('accessToken')
+        const res = await fetch(url.toString(), {
+          headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
+            },
+        });
+
+        if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+
+        const json = await res.json();
+
+        // Support { data: { data: [], total: N } } or { data: [], total: N }
+        const payload = json.data ?? json;
+        const logs    = Array.isArray(payload) ? payload : (payload.data ?? []);
+        totalRecords  = payload.total ?? logs.length;
+        cachedRows    = logs;
+
+        if (logs.length === 0) { showState('empty-state'); return; }
+
+        showState(null);
+        renderRows(logs);
+        renderPagination();
+        updateSummaryStats(logs);
+
+      } catch (err) {
+        showState('error-state');
+        document.getElementById('error-msg').textContent = err.message;
+        console.error(err);
+      }
+    }
+
+    // ─── SUMMARY STATS ───────────────────────────────────────────────────────
+    function updateSummaryStats(logs) {
+      document.getElementById('stat-total').textContent    = totalRecords.toLocaleString();
+      document.getElementById('stat-failed').textContent   =
+        logs.filter(l => l.action?.includes('LOGIN') && l.status === 'FAILED').length;
+      document.getElementById('stat-modified').textContent =
+        logs.filter(l => l.action?.startsWith('UPDATE') || l.action?.startsWith('EDIT')).length;
+      document.getElementById('stat-settings').textContent =
+        logs.filter(l => l.entity_name === 'settings').length;
+    }
+
+    // ─── EXPORT CSV ──────────────────────────────────────────────────────────
+    function exportCSV() {
+      if (!cachedRows.length) return;
+
+      const headers = ['Timestamp', 'User', 'Role', 'Action', 'Entity', 'Entity ID', 'IP Address'];
+      const rows = cachedRows.map(l => [
+        formatDate(l.created_at),
+        l.performed_by_name ?? '',
+        l.performed_by_role ?? '',
+        l.action ?? '',
+        l.entity_name ?? '',
+        l.entity_id ?? '',
+        l.ip_address ?? '',
+      ]);
+
+      const csv = [headers, ...rows]
+        .map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','))
+        .join('\n');
+
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const a    = document.createElement('a');
+      a.href     = URL.createObjectURL(blob);
+      a.download = `audit_log_${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+    }
+
+    // ─── INIT ─────────────────────────────────────────────────────────────────
+    loadLogs();
+  </script>
+  <script src="/js/tabs.js"></script>
+  <script src="/js/stats.js"></script>
+
+</body>
+</html>

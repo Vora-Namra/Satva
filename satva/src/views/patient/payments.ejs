@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Satva — Patient Billing & Payment Ledger</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#10A37F",
+              "primary-dark": "#0d8a6a",
+              "primary-light": "#e6f7f3",
+              "bg-page": "#f0faf6",
+              dark: "#0f1923",
+            },
+            fontFamily: {
+              sans: ["'DM Sans'", "system-ui", "sans-serif"],
+              display: ["'Playfair Display'", "Georgia", "serif"],
+            },
+          },
+        },
+      };
+    </script>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+
+    <style>
+      body {
+        font-family: "DM Sans", sans-serif;
+      }
+    </style>
+  </head>
+
+  <body class="bg-bg-page text-gray-800 min-h-screen flex flex-col">
+    <%- include('../partials/patient-header', { title: 'payments' }) %>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full">
+      <!-- Breadcrumb & Header -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div>
+          <a
+            href="/patient/dashboard"
+            class="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-primary mb-2 transition"
+          >
+            <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+          </a>
+          <h1 class="font-display text-3xl md:text-4xl font-bold text-dark flex items-center gap-3">
+            <span>Billing & Invoices Ledger</span>
+            <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-primary/10 text-primary uppercase tracking-wider">
+              Cashless Enabled
+            </span>
+          </h1>
+          <p class="text-gray-500 text-sm mt-1">
+            Complete history of OPD consultation charges, laboratory diagnostics, medicine dispensaries, and payment receipts.
+          </p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button
+            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-primary hover:bg-primary-dark rounded-xl transition shadow-sm"
+          >
+            <i class="fa-solid fa-credit-card"></i> Pay Outstanding Bill
+          </button>
+          <button
+            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 bg-white hover:bg-gray-50 rounded-xl transition border border-gray-200 shadow-sm"
+          >
+            <i class="fa-solid fa-file-invoice-dollar"></i> Download Annual Statement
+          </button>
+        </div>
+      </div>
+
+      <!-- Financial KPI Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+          <div>
+            <p class="text-xs text-gray-400 font-medium uppercase tracking-wider">Total Billed</p>
+            <p class="text-2xl font-bold text-dark mt-1">₹4,200</p>
+            <p class="text-xs text-gray-500 mt-1">Across 4 consultations</p>
+          </div>
+          <div class="w-12 h-12 rounded-2xl bg-gray-50 text-gray-600 flex items-center justify-center text-xl">
+            <i class="fa-solid fa-receipt"></i>
+          </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+          <div>
+            <p class="text-xs text-gray-400 font-medium uppercase tracking-wider">Total Settled</p>
+            <p class="text-2xl font-bold text-primary mt-1">₹3,700</p>
+            <p class="text-xs text-emerald-600 mt-1 flex items-center gap-1">
+              <i class="fa-solid fa-circle-check"></i> 88% settled
+            </p>
+          </div>
+          <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-primary flex items-center justify-center text-xl">
+            <i class="fa-solid fa-wallet"></i>
+          </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+          <div>
+            <p class="text-xs text-gray-400 font-medium uppercase tracking-wider">Due / Pending</p>
+            <p class="text-2xl font-bold text-amber-600 mt-1">₹500</p>
+            <p class="text-xs text-amber-500 mt-1">Follow-up pharmacy bill</p>
+          </div>
+          <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
+            <i class="fa-solid fa-hourglass-half"></i>
+          </div>
+        </div>
+
+        <div class="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between">
+          <div>
+            <p class="text-xs text-gray-400 font-medium uppercase tracking-wider">Insurance TPA</p>
+            <p class="text-base font-bold text-dark mt-1">Star Health Gold</p>
+            <p class="text-xs text-teal-600 mt-1">Cashless Policy Active</p>
+          </div>
+          <div class="w-12 h-12 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center text-xl">
+            <i class="fa-solid fa-shield-heart"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- Invoices Ledger Table Card -->
+      <div class="bg-white rounded-3xl border border-gray-200 shadow-sm overflow-hidden mb-8">
+        <div class="p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h3 class="text-lg font-bold text-gray-900">Transaction History & Receipts</h3>
+            <p class="text-xs text-gray-500 mt-0.5">Click any entry to view breakdown or print official GST tax receipt.</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="relative">
+              <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+              <input
+                type="text"
+                placeholder="Search invoice or doctor..."
+                class="pl-9 pr-4 py-2 text-xs border border-gray-200 rounded-xl focus:ring-1 focus:ring-primary focus:outline-none w-56"
+              />
+            </div>
+            <select class="text-xs border border-gray-200 rounded-xl px-3 py-2 text-gray-600 focus:outline-none">
+              <option>All Statuses</option>
+              <option>Paid</option>
+              <option>Pending</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-gray-50/80 text-gray-500 text-xs uppercase tracking-wider">
+                <th class="p-4 font-semibold">Invoice No</th>
+                <th class="p-4 font-semibold">Service & Department</th>
+                <th class="p-4 font-semibold">Consulting Doctor</th>
+                <th class="p-4 font-semibold">Date & Time</th>
+                <th class="p-4 font-semibold">Payment Mode</th>
+                <th class="p-4 font-semibold">Amount</th>
+                <th class="p-4 font-semibold">Status</th>
+                <th class="p-4 font-semibold text-right">Receipt</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 text-sm">
+              <tr class="hover:bg-gray-50/60 transition">
+                <td class="p-4 font-mono font-medium text-gray-900 text-xs">
+                  #INV-2026-004
+                </td>
+                <td class="p-4">
+                  <div class="font-medium text-gray-900">Cardiology Consultation</div>
+                  <div class="text-xs text-gray-400">OPD Consultation & ECG Screening</div>
+                </td>
+                <td class="p-4 text-gray-700">Dr. John Doe</td>
+                <td class="p-4 text-xs text-gray-500">Oct 12, 2026, 11:30 AM</td>
+                <td class="p-4">
+                  <span class="inline-flex items-center gap-1.5 text-xs text-gray-700">
+                    <i class="fa-brands fa-google-pay text-base text-blue-600"></i> UPI (GPay)
+                  </span>
+                </td>
+                <td class="p-4 font-bold text-gray-900">₹1,500</td>
+                <td class="p-4">
+                  <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Paid
+                  </span>
+                </td>
+                <td class="p-4 text-right">
+                  <button class="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary-dark transition px-3 py-1.5 rounded-lg hover:bg-primary-light">
+                    <i class="fa-solid fa-download"></i> PDF
+                  </button>
+                </td>
+              </tr>
+
+              <tr class="hover:bg-gray-50/60 transition">
+                <td class="p-4 font-mono font-medium text-gray-900 text-xs">
+                  #INV-2026-003
+                </td>
+                <td class="p-4">
+                  <div class="font-medium text-gray-900">Comprehensive Lipid Profile</div>
+                  <div class="text-xs text-gray-400">Pathology & Diagnostic Laboratory</div>
+                </td>
+                <td class="p-4 text-gray-700">Dr. Sarah Jenkins</td>
+                <td class="p-4 text-xs text-gray-500">Oct 08, 2026, 09:15 AM</td>
+                <td class="p-4">
+                  <span class="inline-flex items-center gap-1.5 text-xs text-gray-700">
+                    <i class="fa-regular fa-credit-card text-gray-500"></i> Credit Card (Visa)
+                  </span>
+                </td>
+                <td class="p-4 font-bold text-gray-900">₹1,200</td>
+                <td class="p-4">
+                  <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Paid
+                  </span>
+                </td>
+                <td class="p-4 text-right">
+                  <button class="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary-dark transition px-3 py-1.5 rounded-lg hover:bg-primary-light">
+                    <i class="fa-solid fa-download"></i> PDF
+                  </button>
+                </td>
+              </tr>
+
+              <tr class="hover:bg-gray-50/60 transition">
+                <td class="p-4 font-mono font-medium text-gray-900 text-xs">
+                  #INV-2026-002
+                </td>
+                <td class="p-4">
+                  <div class="font-medium text-gray-900">Orthopedic Joint Assessment</div>
+                  <div class="text-xs text-gray-400">Initial Physical Assessment</div>
+                </td>
+                <td class="p-4 text-gray-700">Dr. Rajesh Patel</td>
+                <td class="p-4 text-xs text-gray-500">Sep 28, 2026, 02:45 PM</td>
+                <td class="p-4">
+                  <span class="inline-flex items-center gap-1.5 text-xs text-gray-700">
+                    <i class="fa-solid fa-shield-halved text-teal-600"></i> Insurance Cashless
+                  </span>
+                </td>
+                <td class="p-4 font-bold text-gray-900">₹1,000</td>
+                <td class="p-4">
+                  <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Settled
+                  </span>
+                </td>
+                <td class="p-4 text-right">
+                  <button class="inline-flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-primary-dark transition px-3 py-1.5 rounded-lg hover:bg-primary-light">
+                    <i class="fa-solid fa-download"></i> PDF
+                  </button>
+                </td>
+              </tr>
+
+              <tr class="hover:bg-gray-50/60 transition bg-amber-50/20">
+                <td class="p-4 font-mono font-medium text-gray-900 text-xs">
+                  #INV-2026-001
+                </td>
+                <td class="p-4">
+                  <div class="font-medium text-gray-900">Prescribed Medicine Refill</div>
+                  <div class="text-xs text-gray-400">Hospital Pharmacy Inpatient Counter</div>
+                </td>
+                <td class="p-4 text-gray-700">Satva Pharmacy</td>
+                <td class="p-4 text-xs text-gray-500">Oct 11, 2026, 05:20 PM</td>
+                <td class="p-4">
+                  <span class="inline-flex items-center gap-1.5 text-xs text-amber-700">
+                    <i class="fa-solid fa-hourglass-start"></i> Pending Payment
+                  </span>
+                </td>
+                <td class="p-4 font-bold text-amber-700">₹500</td>
+                <td class="p-4">
+                  <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Unpaid
+                  </span>
+                </td>
+                <td class="p-4 text-right">
+                  <button class="inline-flex items-center gap-1.5 text-xs font-semibold text-white bg-primary hover:bg-primary-dark transition px-3 py-1.5 rounded-lg shadow-sm">
+                    <i class="fa-solid fa-bolt"></i> Pay ₹500
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+
+    <footer class="bg-white border-t border-gray-200 mt-12 py-6 text-center text-xs text-gray-400">
+      &copy; 2026 Satva Health Systems. Official GST Compliant Hospital Invoicing Portal.
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Satva — Super Admin Dashboard</title>
+      <script type="module">
+        import { checkSuperAdminJwt } from '/js/check-super-admin-jwt.js';
+        checkSuperAdminJwt();
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#10A37F",
+                        "primary-dark": "#0d8a6a",
+                        "primary-light": "#e6f7f3",
+                        "bg-page": "#f0faf6",
+                        dark: "#0f1923",
+                    },
+                    fontFamily: {
+                        sans: ["'DM Sans'", "system-ui", "sans-serif"],
+                        display: ["'Playfair Display'", "Georgia", "serif"],
+                    },
+                },
+            },
+        };
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+        body { font-family: "DM Sans", sans-serif; }
+    </style>
+  
+</head>
+<body class="bg-bg-page text-gray-800 min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-screen-2xl mx-auto px-6 py-4 flex items-center justify-between">
+            <a href="/super-admin/dashboard" class="flex items-center gap-2.5">
+                <div class="bg-primary rounded-lg p-1.5">
+                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                </div>
+                <span class="text-xl font-bold text-gray-900 font-display">Satva</span>
+            </a>
+            <div class="flex items-center gap-4">
+                <button id="logoutBtn" class="text-sm font-semibold text-gray-600 hover:text-red-600 transition flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1 max-w-screen-2xl w-full mx-auto px-6 py-8">
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold text-gray-800">Overview</h2>
+            <p class="text-gray-500 text-sm mt-1">Platform statistics and management</p>
+        </div>
+
+        <!-- Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-10">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center">
+                <div class="p-3 rounded-full bg-yellow-50 text-yellow-600 mr-4 flex-shrink-0">
+                    <i class="fa-solid fa-indian-rupee-sign fa-lg"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Today's Revenue</p>
+                    <p class="text-2xl font-bold text-gray-800" id="stat-revenue">₹<%= stats && stats.todayRevenue ? stats.todayRevenue : 0 %></p>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center">
+                <div class="p-3 rounded-full bg-blue-50 text-blue-600 mr-4 flex-shrink-0">
+                    <i class="fa-solid fa-calendar-check fa-lg"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Today's Appointments</p>
+                    <p class="text-2xl font-bold text-gray-800" id="stat-appointments"><%= stats && stats.todayAppointments ? stats.todayAppointments : 0 %></p>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center">
+                <div class="p-3 rounded-full bg-green-50 text-green-600 mr-4 flex-shrink-0">
+                    <i class="fa-solid fa-user-doctor fa-lg"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Total Doctors</p>
+                    <p class="text-2xl font-bold text-gray-800" id="stat-doctors"><%= stats && stats.totalDoctors ? stats.totalDoctors : 0 %></p>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center">
+                <div class="p-3 rounded-full bg-purple-50 text-purple-600 mr-4 flex-shrink-0">
+                    <i class="fa-solid fa-hospital fa-lg"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Total Hospitals</p>
+                    <p class="text-2xl font-bold text-gray-800" id="stat-hospitals">...</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center">
+                <div class="p-3 rounded-full bg-orange-50 text-orange-600 mr-4 flex-shrink-0">
+                    <i class="fa-solid fa-user-shield fa-lg"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-500">Total Admins</p>
+                    <p class="text-2xl font-bold text-gray-800" id="stat-admins">...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab View -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="border-b border-gray-200">
+                <nav class="-mb-px flex space-x-8 px-6 overflow-x-auto" aria-label="Tabs" id="dashboardTabs">
+                    <button class="tab-btn border-primary text-primary whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors" data-tab="hospitals">
+                        Hospitals
+                    </button>
+                    <button class="tab-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors" data-tab="admins">
+                        Admins
+                    </button>
+                    <button class="tab-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium transition-colors" data-tab="contactus">
+                        Contact Messages
+                    </button>
+                </nav>
+            </div>
+            
+            <div class="p-6">
+                <!-- Hospitals Tab Content -->
+                <div id="hospitals-tab" class="tab-content block">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-bold text-gray-800">Hospitals</h3>
+                        <div class="flex items-center gap-4">
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                    <i class="fa-solid fa-search text-xs"></i>
+                                </div>
+                                <input type="text" id="hospitals-search" class="focus:ring-primary focus:border-primary block w-64 pl-10 sm:text-sm border-gray-300 rounded-lg py-2 border outline-none transition" placeholder="Search by hospital name...">
+                            </div>
+                            <a href="/hospital/create-hospital" class="bg-primary hover:bg-primary-dark text-white font-medium py-2 px-4 rounded-lg shadow-sm transition flex items-center gap-2">
+                                <i class="fa-solid fa-plus"></i> Create Hospital
+                            </a>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hospital Name</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200" id="hospitals-tbody">
+                                <!-- Data injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Pagination Controls -->
+                    <div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6 mt-4">
+                        <div class="flex flex-1 items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-700 hidden sm:block">
+                                    Showing <span class="font-medium" id="hosp-start">...</span> to <span class="font-medium" id="hosp-end">...</span> of <span class="font-medium" id="hosp-total">...</span> results
+                                </p>
+                            </div>
+                            <div>
+                                <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination" id="hospitals-pagination">
+                                    <!-- Pagination buttons -->
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admins Tab Content -->
+                <div id="admins-tab" class="tab-content hidden">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-bold text-gray-800">Administrators</h3>
+                        <div class="flex items-center gap-4">
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                    <i class="fa-solid fa-search text-xs"></i>
+                                </div>
+                                <input type="text" id="admins-search" class="focus:ring-primary focus:border-primary block w-64 pl-10 sm:text-sm border-gray-300 rounded-lg py-2 border outline-none transition" placeholder="Search by name, email, or hospital...">
+                            </div>
+                            <a href="/super-admin/create-admin" class="bg-primary hover:bg-primary-dark text-white font-medium py-2 px-4 rounded-lg shadow-sm transition flex items-center gap-2">
+                                <i class="fa-solid fa-plus"></i> Create Admin
+                            </a>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200" id="admins-tbody">
+                                <!-- Data injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Pagination Controls -->
+                    <div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6 mt-4">
+                        <div class="flex flex-1 items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-700 hidden sm:block">
+                                    Showing <span class="font-medium" id="adm-start">...</span> to <span class="font-medium" id="adm-end">...</span> of <span class="font-medium" id="adm-total">...</span> results
+                                </p>
+                            </div>
+                            <div>
+                                <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination" id="admins-pagination">
+                                    <!-- Pagination buttons -->
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Messages Tab Content -->
+                <div id="contactus-tab" class="tab-content hidden">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-bold text-gray-800">Contact Messages</h3>
+                        <div class="flex items-center gap-4">
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+                                    <i class="fa-solid fa-search text-xs"></i>
+                                </div>
+                                <input type="text" id="contactus-search" class="focus:ring-primary focus:border-primary block w-64 pl-10 sm:text-sm border-gray-300 rounded-lg py-2 border outline-none transition" placeholder="Search messages...">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Message</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200" id="contactus-tbody">
+                                <!-- Data injected here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Pagination Controls -->
+                    <div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6 mt-4">
+                        <div class="flex flex-1 items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-700 hidden sm:block">
+                                    Showing <span class="font-medium" id="contact-start">...</span> to <span class="font-medium" id="contact-end">...</span> of <span class="font-medium" id="contact-total">...</span> results
+                                </p>
+                            </div>
+                            <div>
+                                <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination" id="contactus-pagination">
+                                    <!-- Pagination buttons -->
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Reply Modal -->
+    <div id="replyModal" class="fixed inset-0 z-[100] hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onclick="closeReplyModal()"></div>
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
+                <form id="replyForm" onsubmit="event.preventDefault(); submitReply();">
+                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <div class="sm:flex sm:items-start">
+                            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-primary-light sm:mx-0 sm:h-10 sm:w-10">
+                                <i class="fa-solid fa-reply text-primary"></i>
+                            </div>
+                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                                <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">Reply to Message</h3>
+                                <div class="mt-2">
+                                    <input type="hidden" id="replyMessageId">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Reply Text</label>
+                                    <textarea id="replyText" rows="4" class="shadow-sm focus:ring-primary focus:border-primary block w-full sm:text-sm border-gray-300 rounded-md border outline-none p-2" placeholder="Write your reply here..." required></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary text-base font-medium text-white hover:bg-primary-dark focus:outline-none sm:ml-3 sm:w-auto sm:text-sm transition">
+                            Send Reply
+                        </button>
+                        <button type="button" onclick="closeReplyModal()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include error flash () -->
+    <%- include("../error_flash") %>
+
+    <!-- Include Dashboard Script -->
+    <script src="/js/super-admin-dashboard.js"></script>
+</body>
+</html>

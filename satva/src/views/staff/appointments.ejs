@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Appointments — Satva Staff</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { primary: '#00966B' }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-white font-sans">
+
+  <!-- Navbar -->
+  <div class="max-w-7xl mx-auto px-6 pt-7">
+ <%- include('../admin/navbar.ejs') %>
+ </div>
+  <div class="max-w-7xl mx-auto px-6 pt-7">
+
+    <!-- Page Header -->
+    <h1 class="text-2xl font-medium text-gray-900 mb-1">Staff Dashboard</h1>
+    <p class="text-sm text-gray-500 mb-6">System overview and management</p>
+
+    <!-- stats -->
+
+   <%- include('../admin/stats.ejs') %>
+
+    <!-- Tabs -->
+   <%-include('tabs.ejs')%>
+
+    <!-- Summary Mini Cards -->
+    <div class="grid grid-cols-4 gap-4 mb-6">
+      <div class="border border-gray-200 rounded-xl p-5">
+        <div id="stat-reschedule" class="text-2xl font-bold text-gray-900 mb-1">—</div>
+        <div class="text-sm text-gray-500">Rescheduled</div>
+      </div>
+      <div class="border border-gray-200 rounded-xl p-5">
+        <div id="stat-completed" class="text-2xl font-bold text-green-600 mb-1">—</div>
+        <div class="text-sm text-gray-500">Completed</div>
+      </div>
+      <div class="border border-gray-200 rounded-xl p-5">
+        <div id="stat-upcoming" class="text-2xl font-bold text-blue-500 mb-1">—</div>
+        <div class="text-sm text-gray-500">Upcoming</div>
+      </div>
+      <div class="border border-gray-200 rounded-xl p-5">
+        <div id="stat-cancelled" class="text-2xl font-bold text-red-500 mb-1">—</div>
+        <div class="text-sm text-gray-500">Cancelled</div>
+      </div>
+    </div>
+
+
+
+
+    <!-- Filters + List -->
+    <div class="border border-gray-200 rounded-xl mb-8">
+
+      <!-- Filter Row -->
+      <div class="flex items-center gap-3 p-4 border-b border-gray-100">
+        <div class="flex items-center gap-2 border border-gray-200 rounded-lg px-3 py-2">
+          <i class="ti ti-calendar text-gray-400 text-sm"></i>
+          <input
+            id="filter-date"
+            type="date"
+            onchange="applyFilters()"
+            class="text-sm text-gray-700 outline-none bg-transparent"
+          />
+        </div>
+
+        <select
+          id="filter-doctor"
+          onchange="applyFilters()"
+          class="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 outline-none focus:border-green-500 bg-white"
+        >
+          <option value="">All Doctors</option>
+        </select>
+
+        <select
+          id="filter-status"
+          onchange="applyFilters()"
+          class="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 outline-none focus:border-green-500 bg-white"
+        >
+          <option value="">All Status</option>
+          <option value="CONFIRMED">Confirmed</option>
+          <option value="COMPLETED">Completed</option>
+          <option value="CHECKED_IN">Checked In</option>
+          <option value="IN_PROGRESS">In Progress</option>
+          <option value="CANCELLED">Cancelled</option>
+          <option value="NO_SHOW">No Show</option>
+          <option value="PAYMENT_PENDING">Payment Pending</option>
+          <option value="RESCHEDULED">Rescheduled</option>
+        </select>
+
+        <button
+          onclick="clearFilters()"
+          class="text-sm text-gray-400 hover:text-gray-600 px-3 py-2 transition"
+        >
+          Clear
+        </button>
+      </div>
+
+      <!-- Loading -->
+      <div id="loading-state" class="flex flex-col items-center justify-center py-16 gap-3">
+        <i class="ti ti-loader-2 text-3xl text-green-600 animate-spin"></i>
+        <p class="text-sm text-gray-400">Loading appointments...</p>
+      </div>
+
+      <!-- Error -->
+      <div id="error-state" class="hidden flex-col items-center justify-center py-16 gap-3">
+        <i class="ti ti-alert-circle text-3xl text-red-400"></i>
+        <p class="text-sm font-medium text-gray-700">Failed to load appointments</p>
+        <p id="error-msg" class="text-xs text-gray-400"></p>
+        <button onclick="loadAppointments()" class="mt-1 text-sm text-green-600 hover:underline">Retry</button>
+      </div>
+
+      <!-- Empty -->
+      <div id="empty-state" class="hidden flex-col items-center justify-center py-16 gap-3">
+        <i class="ti ti-calendar-off text-3xl text-gray-300"></i>
+        <p class="text-sm text-gray-400">No appointments found</p>
+      </div>
+
+
+
+
+
+      
+      <!-- Appointment List -->
+      <div id="appointment-list" class="divide-y divide-gray-100"></div>
+
+      <!-- Pagination -->
+      <div id="pagination" class="hidden items-center justify-between px-5 py-3.5 border-t border-gray-100">
+        <p id="pagination-info" class="text-sm text-gray-500"></p>
+        <div class="flex items-center gap-2">
+          <button id="prev-btn" onclick="changePage(-1)"
+            class="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition">
+            <i class="ti ti-chevron-left"></i> Prev
+          </button>
+          <button id="next-btn" onclick="changePage(1)"
+            class="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition">
+            Next <i class="ti ti-chevron-right"></i>
+          </button>
+        </div>
+      </div>
+
+    </div>
+<!-- Check In Modal -->
+<div id="checkin-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center">
+
+  <!-- Backdrop -->
+  <div class="absolute inset-0 bg-black bg-opacity-40" onclick="closeCheckInModal()"></div>
+
+  <!-- Modal Card -->
+  <div class="relative bg-white rounded-2xl shadow-xl w-full max-w-lg mx-4 z-10">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+      <div>
+        <h2 class="text-base font-semibold text-gray-900">Patient Check-In</h2>
+        <p id="modal-subtitle" class="text-xs text-gray-400 mt-0.5"></p>
+      </div>
+      <button onclick="closeCheckInModal()" class="text-gray-400 hover:text-gray-600 transition">
+        <i class="ti ti-x text-lg"></i>
+      </button>
+    </div>
+
+    <!-- Step 1: Confirmation Number Input -->
+    <div id="step-confirm" class="px-6 py-5">
+      <label class="text-sm font-medium text-gray-700 block mb-2">
+        Enter Confirmation Number
+      </label>
+      <div class="flex items-center gap-2 border border-gray-200 rounded-lg px-4 py-2.5 focus-within:border-green-500 transition mb-3">
+        <i class="ti ti-ticket text-gray-400"></i>
+        <input
+          id="modal-confirmation-input"
+          type="text"
+          placeholder="e.g. CONF-2026-0001"
+          class="flex-1 text-sm text-gray-700 outline-none bg-transparent"
+          onkeydown="if(event.key==='Enter') verifyConfirmation()"
+        />
+      </div>
+      <p id="confirm-error" class="hidden text-xs text-red-500 mb-3 flex items-center gap-1">
+        <i class="ti ti-alert-circle"></i>
+        <span id="confirm-error-msg"></span>
+      </p>
+      <button onclick="verifyConfirmation()" id="verify-btn"
+        class="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium py-2.5 rounded-lg transition">
+        <i class="ti ti-search"></i> Verify & Fetch Details
+      </button>
+    </div>
+
+    <!-- Step 2: Patient Details + Payment + Check In -->
+    <div id="step-details" class="hidden px-6 py-5 space-y-4">
+
+      <!-- Patient + Appointment info -->
+      <div class="grid grid-cols-2 gap-4">
+
+        <div class="bg-gray-50 rounded-xl p-4">
+          <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Patient</p>
+          <p id="d-patient-name"  class="text-sm font-semibold text-gray-900 mb-1"></p>
+          <p id="d-patient-mobile" class="text-xs text-gray-500"></p>
+          <div class="flex items-center gap-2 mt-1.5">
+            <span id="d-blood-group"
+              class="text-xs font-medium bg-red-50 text-red-600 border border-red-200 px-2 py-0.5 rounded-full"></span>
+          </div>
+        </div>
+
+        <div class="bg-gray-50 rounded-xl p-4">
+          <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Appointment</p>
+          <p id="d-doctor-name"  class="text-sm font-medium text-gray-700 mb-1"></p>
+          <p id="d-slot-time"    class="text-xs text-gray-500 mb-1"></p>
+          <p id="d-appt-type"    class="text-xs text-gray-500"></p>
+        </div>
+
+      </div>
+
+      <!-- Payment Section -->
+      <div id="payment-section" class="border border-gray-200 rounded-xl p-4">
+        <div class="flex items-center justify-between mb-3">
+          <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Payment</p>
+          <span id="payment-status-badge" class="text-xs font-medium px-2.5 py-1 rounded-full border"></span>
+        </div>
+
+        <div class="flex items-center justify-between">
+          <div class="text-sm text-gray-700">
+            Amount: <span id="d-amount" class="font-semibold text-gray-900"></span>
+          </div>
+
+          <!-- Payment Done button — only shown if payment is pending -->
+          <button
+            id="payment-done-btn"
+            onclick="markPaymentDone()"
+            class="hidden flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition"
+          >
+            <i class="ti ti-credit-card"></i> Mark Payment Done
+          </button>
+        </div>
+      </div>
+
+      <!-- Check In Button -->
+      <button
+        id="final-checkin-btn"
+        onclick="finalCheckIn()"
+        class="w-full flex items-center justify-center gap-2 text-sm font-semibold py-2.5 rounded-lg transition"
+      >
+        <i class="ti ti-login"></i> Check In Patient
+      </button>
+
+    </div>
+
+  </div>
+</div>
+
+  </div>
+
+  <script>
+    // ─── CONFIG ──────────────────────────────────────────────────────
+    const API_BASE = 'http://localhost:3333/api/v1/staff';
+    const PAGE_SIZE = 10;
+
+    let currentPage  = 1;
+    let totalRecords = 0;
+
+    
+    // ─── HELPERS ─────────────────────────────────────────────────────
+    function getToken() {
+      return localStorage.getItem('accessToken') ?? '';
+    }
+
+    function formatTime(timeStr) {
+      if (!timeStr) return '—';
+      const [h, m] = timeStr.split(':');
+      const hour   = parseInt(h);
+      const ampm   = hour >= 12 ? 'PM' : 'AM';
+      const h12    = hour % 12 || 12;
+      return { time: `${h12}:${m}`, ampm };
+    }
+
+    function statusConfig(status) {
+      const map = {
+        COMPLETED:       { label: 'Completed',       cls: 'bg-green-50 text-green-700 border-green-200' },
+        CONFIRMED:       { label: 'Confirmed',        cls: 'bg-blue-50 text-blue-700 border-blue-200'   },
+        CHECKED_IN:      { label: 'Checked In',       cls: 'bg-teal-50 text-teal-700 border-teal-200'   },
+        IN_PROGRESS:     { label: 'In Progress',      cls: 'bg-yellow-50 text-yellow-700 border-yellow-200' },
+        CANCELLED:       { label: 'Cancelled',        cls: 'bg-red-50 text-red-600 border-red-200'      },
+        NO_SHOW:         { label: 'No Show',          cls: 'bg-gray-100 text-gray-500 border-gray-200'  },
+        PAYMENT_PENDING: { label: 'Payment Pending',  cls: 'bg-orange-50 text-orange-600 border-orange-200' },
+        RESCHEDULED:     { label: 'Rescheduled',      cls: 'bg-purple-50 text-purple-700 border-purple-200' },
+      };
+      return map[status] ?? { label: status, cls: 'bg-gray-100 text-gray-600 border-gray-200' };
+    }
+
+    // ─── SHOW / HIDE STATES ──────────────────────────────────────────
+    function showState(state) {
+      ['loading-state', 'error-state', 'empty-state'].forEach(id => {
+        const el = document.getElementById(id);
+        el.classList.add('hidden');
+        el.classList.remove('flex');
+      });
+      document.getElementById('appointment-list').innerHTML = '';
+      document.getElementById('pagination').classList.add('hidden');
+      document.getElementById('pagination').classList.remove('flex');
+
+      if (state) {
+        const el = document.getElementById(state);
+        el.classList.remove('hidden');
+        el.classList.add('flex');
+      }
+    }
+
+    // ─── RENDER APPOINTMENTS ─────────────────────────────────────────
+  function renderAppointments(appointments) {
+  const list = document.getElementById('appointment-list');
+
+  list.innerHTML = appointments.map(a => {
+    const { time, ampm } = formatTime(a.start_time);
+    const status         = statusConfig(a.appointment_status);
+    const patientName    = `${a.patient_name ?? ''}`.trim() || '—';
+    const doctorName     = `Dr. ${a.doctor_name ?? ''}`.trim();
+    const specialty      = a.specialty_name ?? '';
+    const type           = a.appointment_type === 'TELEMEDICINE'
+      ? '<span class="text-xs text-purple-600 bg-purple-50 border border-purple-200 px-2 py-0.5 rounded-full ml-2">Telemedicine</span>'
+      : '';
+
+    const rowBg = a.appointment_status === 'IN_PROGRESS'
+      ? 'bg-green-50 border-l-4 border-l-green-500'
+      : 'hover:bg-gray-50';
+
+    // ✅ action buttons only for CONFIRMED
+    const actionBtns = a.appointment_status === 'CONFIRMED'
+      ? `<div class="flex items-center gap-2">
+           <button
+             onclick="openCheckInModal(${a.appointment_id}, '${patientName}', '${doctorName}')"
+             class="text-xs font-medium px-3 py-1.5 rounded-lg border border-green-200 text-green-700 hover:bg-green-50 transition">
+             <i class="ti ti-login mr-1"></i>Check In
+           </button>
+           <button
+             onclick="markNoShow(${a.appointment_id})"
+             class="text-xs font-medium px-3 py-1.5 rounded-lg border border-red-200 text-red-500 hover:bg-red-50 transition">
+             <i class="ti ti-user-off mr-1"></i>No Show
+           </button>
+         </div>`
+      : `<a href="/staff/appointments/${a.appointment_id}"
+           class="text-sm font-medium text-green-600 hover:underline whitespace-nowrap">
+           View Details
+         </a>`;
+
+    return `
+      <div class="flex items-center gap-5 px-5 py-4 transition ${rowBg}">
+        <div class="w-14 shrink-0 text-center">
+          <div class="text-lg font-bold text-green-600 leading-tight">${time}</div>
+          <div class="text-xs text-gray-400">${ampm}</div>
+        </div>
+        <div class="w-px h-10 bg-gray-200 shrink-0"></div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-1.5">
+            <p class="text-sm font-semibold text-gray-900">${patientName}</p>
+            ${type}
+          </div>
+          <p class="text-xs text-gray-400 mt-0.5">
+            ${doctorName}${specialty ? ` • ${specialty}` : ''}
+          </p>
+        </div>
+        <div class="flex items-center gap-3 shrink-0">
+          <span class="text-xs font-medium px-2.5 py-1 rounded-full border ${status.cls}">
+            ${status.label}
+          </span>
+          ${actionBtns}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+    // ─── UPDATE STATS ────────────────────────────────────────────────
+   function updateStats(appointments, total) {
+  // 1. Updated to filter and calculate only RESCHEDULED appointments
+  document.getElementById('stat-reschedule').textContent =
+    appointments.filter(a => a.appointment_status === 'RESCHEDULED').length;
+    
+  document.getElementById('stat-completed').textContent =
+    appointments.filter(a => a.appointment_status === 'COMPLETED').length;
+    
+  document.getElementById('stat-upcoming').textContent =
+    appointments.filter(a => ['CONFIRMED','CHECKED_IN'].includes(a.appointment_status)).length;
+    
+  document.getElementById('stat-cancelled').textContent =
+    appointments.filter(a => a.appointment_status === 'CANCELLED').length;
+}
+
+    // ─── PAGINATION ──────────────────────────────────────────────────
+    function updatePagination() {
+      const start = (currentPage - 1) * PAGE_SIZE + 1;
+      const end   = Math.min(currentPage * PAGE_SIZE, totalRecords);
+
+      document.getElementById('pagination-info').textContent =
+        `Showing ${start}–${end} of ${totalRecords} appointments`;
+      document.getElementById('prev-btn').disabled =
+        currentPage === 1;
+      document.getElementById('next-btn').disabled =
+        currentPage * PAGE_SIZE >= totalRecords;
+
+      const pg = document.getElementById('pagination');
+      pg.classList.remove('hidden');
+      pg.classList.add('flex');
+    }
+
+    function changePage(delta) {
+      currentPage += delta;
+      loadAppointments();
+    }
+
+    // ─── FILTERS ─────────────────────────────────────────────────────
+    function applyFilters() {
+      currentPage = 1;
+      loadAppointments();
+    }
+
+    function clearFilters() {
+      document.getElementById('filter-date').value   = '';
+      document.getElementById('filter-doctor').value = '';
+      document.getElementById('filter-status').value = '';
+      currentPage = 1;
+      loadAppointments();
+    }
+
+    // ─── LOAD DOCTORS FOR FILTER DROPDOWN ────────────────────────────
+    async function loadDoctorFilter() {
+      try {
+        const res = await fetch(`${API_BASE}/fetchAppointments`, {
+          headers: { 'Authorization': `Bearer ${getToken()}` }
+        });
+        if (!res.ok) return;
+
+        const json    = await res.json();
+        const doctors = Array.isArray(json) ? json : (json.data ?? []);
+        const select  = document.getElementById('filter-doctor');
+
+        doctors.forEach(d => {
+          const opt   = document.createElement('option');
+          opt.value   = d.doctor_id;
+          opt.textContent = `Dr. ${d.first_name} ${d.last_name}`;
+          select.appendChild(opt);
+        });
+      } catch (err) {
+        console.warn('Could not load doctor filter:', err);
+      }
+    }
+
+
+
+    
+
+    // ─── MAIN FETCH ──────────────────────────────────────────────────
+  async function loadAppointments() {
+  showState('loading-state');
+
+  const date     = document.getElementById('filter-date').value;
+  const doctorId = document.getElementById('filter-doctor').value;
+  const status   = document.getElementById('filter-status').value;
+
+  try {
+    const url = new URL(`${API_BASE}/fetchAppointments`);
+    url.searchParams.set('page',  currentPage);
+    url.searchParams.set('limit', PAGE_SIZE);
+    if (date)     url.searchParams.set('date',      date);
+    if (doctorId) url.searchParams.set('doctor_id', doctorId);
+    if (status)   url.searchParams.set('status',    status);
+
+    const res = await fetch(url.toString(), {
+      headers: {
+        'Content-Type':  'application/json',
+        'Authorization': `Bearer ${getToken()}`,
+      }
+    });
+
+    if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+
+    const json         = await res.json();
+    const payload      = json.data ?? json;
+    const appointments = Array.isArray(payload) ? payload : (payload.data ?? []);
+    totalRecords       = payload.total ?? appointments.length;
+
+    // ✅ always update stats, even when list is empty
+    updateStats(appointments);
+
+    if (appointments.length === 0) {
+      showState('empty-state');
+      return;
+    }
+
+    showState(null);
+    renderAppointments(appointments);
+    updatePagination();
+
+  } catch (err) {
+    showState('error-state');
+    document.getElementById('error-msg').textContent = err.message;
+    console.error(err);
+
+    // ✅ also reset stats to 0 on error, not stuck at —
+    updateStats([]);
+  }
+}
+    // ─── INIT ─────────────────────────────────────────────────────────
+    loadDoctorFilter();
+    loadAppointments();
+
+
+
+// ─── MODAL STATE ──────────────────────────────────────────────────
+let modalAppointmentId = null;
+let modalAppointment   = null;
+let paymentConfirmed   = false;
+
+// ─── OPEN MODAL ───────────────────────────────────────────────────
+function openCheckInModal(appointment_id, patientName, doctorName) {
+  modalAppointmentId = appointment_id;
+  modalAppointment   = null;
+  paymentConfirmed   = false;
+
+  // reset to step 1
+  document.getElementById('step-confirm').classList.remove('hidden');
+  document.getElementById('step-details').classList.add('hidden');
+  document.getElementById('modal-confirmation-input').value = '';
+  document.getElementById('confirm-error').classList.add('hidden');
+  document.getElementById('modal-subtitle').textContent =
+    `${patientName} · ${doctorName}`;
+
+  document.getElementById('checkin-modal').classList.remove('hidden');
+  document.getElementById('modal-confirmation-input').focus();
+}
+
+function closeCheckInModal() {
+  document.getElementById('checkin-modal').classList.add('hidden');
+  modalAppointmentId = null;
+  modalAppointment   = null;
+  paymentConfirmed   = false;
+}
+
+// ─── STEP 1: VERIFY CONFIRMATION NUMBER ───────────────────────────
+async function verifyConfirmation() {
+  const input      = document.getElementById('modal-confirmation-input').value.trim();
+  const errorEl    = document.getElementById('confirm-error');
+  const errorMsgEl = document.getElementById('confirm-error-msg');
+  const verifyBtn  = document.getElementById('verify-btn');
+
+  if (!input) {
+    errorMsgEl.textContent = 'Please enter a confirmation number';
+    errorEl.classList.remove('hidden');
+    return;
+  }
+
+  errorEl.classList.add('hidden');
+  verifyBtn.disabled  = true;
+  verifyBtn.innerHTML = '<i class="ti ti-loader-2 animate-spin"></i> Verifying...';
+
+  try {
+    const res  = await fetch(`${API_BASE}/appointments/confirm/${input}`, {
+      headers: { 'Authorization': `Bearer ${getToken()}` }
+    });
+    const json = await res.json();
+
+    if (!res.ok || !json.data) {
+      errorMsgEl.textContent = json.message ?? 'Confirmation number not found';
+      errorEl.classList.remove('hidden');
+      return;
+    }
+
+    const appt = json.data;
+
+    // make sure it matches the appointment the staff clicked on
+    if (appt.appointment_id !== modalAppointmentId) {
+      errorMsgEl.textContent = 'Confirmation number does not match this appointment';
+      errorEl.classList.remove('hidden');
+      return;
+    }
+
+    modalAppointment = appt;
+    showStep2(appt);
+
+  } catch (err) {
+    errorMsgEl.textContent = err.message;
+    errorEl.classList.remove('hidden');
+  } finally {
+    verifyBtn.disabled  = false;
+    verifyBtn.innerHTML = '<i class="ti ti-search"></i> Verify & Fetch Details';
+  }
+}
+
+// ─── STEP 2: SHOW PATIENT + PAYMENT DETAILS ───────────────────────
+function showStep2(a) {
+  document.getElementById('step-confirm').classList.add('hidden');
+  document.getElementById('step-details').classList.remove('hidden');
+
+  // patient info
+  document.getElementById('d-patient-name').textContent   = a.patient_name   ?? '—';
+  document.getElementById('d-patient-mobile').textContent = a.patient_mobile  ?? '—';
+  document.getElementById('d-blood-group').textContent    = a.patient_blood_group ?? '—';
+
+  // appointment info
+  document.getElementById('d-doctor-name').textContent =
+    `Dr. ${a.doctor_name ?? '—'}`;
+  document.getElementById('d-slot-time').textContent    =
+    `${formatDateStr(a.slot_date)} · ${formatTimeStr(a.start_time)}`;
+  document.getElementById('d-appt-type').textContent    = a.appointment_type ?? '—';
+
+  // payment
+  document.getElementById('d-amount').textContent =
+    a.payment_amount ? `INR ${Number(a.payment_amount).toLocaleString()}` : '—';
+
+  updatePaymentUI(a.payment_status === 'SUCCESS');
+}
+
+// ─── PAYMENT UI ───────────────────────────────────────────────────
+function updatePaymentUI(isPaid) {
+  const badge         = document.getElementById('payment-status-badge');
+  const paymentDonBtn = document.getElementById('payment-done-btn');
+  const checkInBtn    = document.getElementById('final-checkin-btn');
+
+  if (isPaid || paymentConfirmed) {
+    // payment done
+    badge.textContent = 'Payment Done';
+    badge.className   = 'text-xs font-medium px-2.5 py-1 rounded-full border bg-green-50 text-green-700 border-green-200';
+    paymentDonBtn.classList.add('hidden');
+
+    // enable check in button
+    checkInBtn.disabled   = false;
+    checkInBtn.className  =
+      'w-full flex items-center justify-center gap-2 text-sm font-semibold py-2.5 rounded-lg transition bg-green-600 hover:bg-green-700 text-white';
+
+  } else {
+    // payment pending
+    badge.textContent = 'Payment Pending';
+    badge.className   = 'text-xs font-medium px-2.5 py-1 rounded-full border bg-red-50 text-red-600 border-red-200';
+    paymentDonBtn.classList.remove('hidden');
+
+    // disable check in button until payment done
+    checkInBtn.disabled  = true;
+    checkInBtn.className =
+      'w-full flex items-center justify-center gap-2 text-sm font-semibold py-2.5 rounded-lg transition bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200';
+  }
+}
+
+// ─── MARK PAYMENT DONE ────────────────────────────────────────────
+async function markPaymentDone() {
+  const btn = document.getElementById('payment-done-btn');
+  btn.disabled  = true;
+  btn.innerHTML = '<i class="ti ti-loader-2 animate-spin"></i> Updating...';
+
+  try {
+    const res  = await fetch(
+      `${API_BASE}/appointments/${modalAppointmentId}/payment`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type':  'application/json',
+          'Authorization': `Bearer ${getToken()}`,
+        },
+        body: JSON.stringify({ status: 'SUCCESS' }),
+      }
+    );
+
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.message ?? 'Failed to update payment');
+
+    paymentConfirmed = true;
+    updatePaymentUI(true); // ✅ unlock check in button
+
+  } catch (err) {
+    alert(`Payment update failed: ${err.message}`);
+    btn.disabled  = false;
+    btn.innerHTML = '<i class="ti ti-credit-card"></i> Mark Payment Done';
+  }
+}
+
+// ─── FINAL CHECK IN ───────────────────────────────────────────────
+async function finalCheckIn() {
+  const btn = document.getElementById('final-checkin-btn');
+  btn.disabled  = true;
+  btn.innerHTML = '<i class="ti ti-loader-2 animate-spin"></i> Checking in...';
+
+  try {
+    const res  = await fetch(
+      `${API_BASE}/appointments/${modalAppointmentId}/checkin`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type':  'application/json',
+          'Authorization': `Bearer ${getToken()}`,
+        }
+      }
+    );
+
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.message ?? 'Check-in failed');
+
+    closeCheckInModal();
+    loadAppointments(); // ✅ refresh list — row will no longer show Check In button
+
+  } catch (err) {
+    alert(`Check-in failed: ${err.message}`);
+    btn.disabled  = false;
+    btn.innerHTML = '<i class="ti ti-login"></i> Check In Patient';
+  }
+}
+
+// ─── NO SHOW ──────────────────────────────────────────────────────
+async function markNoShow(appointment_id) {
+  if (!confirm('Mark this patient as No Show?')) return;
+
+  try {
+    const res  = await fetch(
+      `${API_BASE}/appointments/${appointment_id}/noshow`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type':  'application/json',
+          'Authorization': `Bearer ${getToken()}`,
+        }
+      }
+    );
+
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.message ?? 'Failed');
+
+    loadAppointments(); // ✅ refresh list
+
+  } catch (err) {
+    alert(`Failed: ${err.message}`);
+  }
+}
+
+// ─── HELPERS ──────────────────────────────────────────────────────
+function formatDateStr(dateStr) {
+  if (!dateStr) return '—';
+  return new Date(dateStr).toLocaleDateString('en-US', {
+    year: 'numeric', month: 'long', day: 'numeric'
+  });
+}
+
+function formatTimeStr(timeStr) {
+  if (!timeStr) return '—';
+  const [h, m] = timeStr.split(':');
+  const hour   = parseInt(h);
+  const ampm   = hour >= 12 ? 'PM' : 'AM';
+  const h12    = hour % 12 || 12;
+  return `${h12}:${m} ${ampm}`;
+}
+    
+  </script>
+ <script src="/js/stafftabs.js"></script>
+  <script src="/js/staffstats.js"></script>
+</body>
+</html> 

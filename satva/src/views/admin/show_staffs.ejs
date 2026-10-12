@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Staff — Satva Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" />
+  <script>
+    tailwind.config = {
+      theme: { extend: { colors: { primary: '#10A37F', 'primary-dark': '#0d8a6a', 'primary-light': '#e6f7f3' } } }
+    }
+  </script>
+</head>
+<body class="bg-white font-sans">
+
+  <!-- Navbar -->
+  <div class="max-w-7xl mx-auto px-6 pt-7">
+ <%- include('navbar.ejs') %>
+ </div>
+
+  <main class="max-w-7xl mx-auto px-6 py-8">
+
+ <h1 class="text-2xl font-medium text-gray-900 mb-1">Admin Dashboard</h1>
+    <p class="text-sm text-gray-500 mb-6">System overview and management</p>
+
+      <!-- stats -->
+
+   <%- include('stats.ejs') %>
+
+    <!-- Tabs -->
+   <%-include('tabs.ejs')%>
+
+
+  
+    <!-- Search + Add -->
+    <div class="flex items-center gap-3 mb-6">
+      <div class="relative flex-1">
+        <i class="ti ti-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+        <input
+          id="search-input"
+          type="text"
+          placeholder="Search staff by name or role..."
+          oninput="filterStaff()"
+          class="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
+        />
+      </div>
+
+      <!-- Role filter -->
+      <select
+        id="role-filter"
+        onchange="filterStaff()"
+        class="border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-700 outline-none focus:ring-2 focus:ring-primary bg-white"
+      >
+        <option value="">All Roles</option>
+        <option value="RECEPTIONIST">Receptionist</option>
+        <option value="NURSE">Nurse</option>
+        
+      </select>
+
+      <button
+        onclick="window.location.href='/admin/add-staff'"
+        class="flex items-center gap-2 bg-primary hover:bg-primary-dark text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition"
+      >
+        <i class="ti ti-user-plus text-base"></i>
+        Add Staff
+      </button>
+    </div>
+
+    <!-- Staff List -->
+    <div id="staff-list" class="space-y-3">
+
+      <!-- Skeleton -->
+      <div id="loading-skeleton" class="space-y-3">
+        <div class="border border-gray-100 rounded-xl p-5 animate-pulse flex items-center gap-4">
+          <div class="w-14 h-14 rounded-full bg-gray-200"></div>
+          <div class="flex-1 space-y-2">
+            <div class="h-4 bg-gray-200 rounded w-40"></div>
+            <div class="h-3 bg-gray-100 rounded w-28"></div>
+          </div>
+        </div>
+        <div class="border border-gray-100 rounded-xl p-5 animate-pulse flex items-center gap-4">
+          <div class="w-14 h-14 rounded-full bg-gray-200"></div>
+          <div class="flex-1 space-y-2">
+            <div class="h-4 bg-gray-200 rounded w-40"></div>
+            <div class="h-3 bg-gray-100 rounded w-28"></div>
+          </div>
+        </div>
+        <div class="border border-gray-100 rounded-xl p-5 animate-pulse flex items-center gap-4">
+          <div class="w-14 h-14 rounded-full bg-gray-200"></div>
+          <div class="flex-1 space-y-2">
+            <div class="h-4 bg-gray-200 rounded w-40"></div>
+            <div class="h-3 bg-gray-100 rounded w-28"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Staff Cards -->
+      <div id="staff-container" class="hidden space-y-3"></div>
+
+      <!-- Error -->
+      <div id="error-state" class="hidden flex flex-col items-center justify-center py-16 gap-3">
+        <i class="ti ti-alert-circle text-3xl text-red-400"></i>
+        <p class="text-sm font-medium text-gray-700">Failed to load staff</p>
+        <button onclick="loadStaff()" class="text-sm text-primary hover:underline">Try again</button>
+      </div>
+
+      <!-- Empty -->
+      <div id="empty-state" class="hidden flex flex-col items-center justify-center py-16 gap-3">
+        <i class="ti ti-users-off text-3xl text-gray-300"></i>
+        <p class="text-sm text-gray-400">No staff members found</p>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script>
+    const API_BASE = 'http://localhost:3333/api/v1/admin';
+    let allStaff   = [];
+
+    function getToken() {
+      return localStorage.getItem('accessToken') ?? '';
+    }
+
+   
+
+   
+    // ── Helpers ───────────────────────────────────────
+    function initials(first, last) {
+      return ((first?.[0] ?? '') + (last?.[0] ?? '')).toUpperCase() || '?';
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '—';
+      return new Date(dateStr).toLocaleDateString('en-US', {
+        year: 'numeric', month: 'short', day: 'numeric'
+      });
+    }
+
+    function calculateAge(dob) {
+      if (!dob) return null;
+      const diff = Date.now() - new Date(dob).getTime();
+      return Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
+    }
+
+    function roleConfig(role) {
+      const map = {
+        RECEPTIONIST:   { label: 'Receptionist',   cls: 'bg-blue-50 text-blue-700 border-blue-200'     },
+        NURSE:          { label: 'Nurse',           cls: 'bg-pink-50 text-pink-700 border-pink-200'     },
+      
+      };
+      return map[role] ?? { label: role ?? 'Staff', cls: 'bg-gray-100 text-gray-600 border-gray-200' };
+    }
+
+    function avatarColor(role) {
+      const map = {
+        RECEPTIONIST:   'bg-blue-100 text-blue-700',
+        NURSE:          'bg-pink-100 text-pink-700',
+       
+      };
+      return map[role] ?? 'bg-green-100 text-green-700';
+    }
+
+    // ── Render staff card ─────────────────────────────
+    function staffCard(s) {
+      const fullName  = `${s.first_name ?? ''} ${s.last_name ?? ''}`.trim();
+      const role      = roleConfig(s.staff_role);
+      const avColor   = avatarColor(s.staff_role);
+      const age       = calculateAge(s.dob);
+      const isActive  = s.is_active == 1 || s.is_active === true;
+
+      const statusBadge = isActive
+        ? `<span class="text-xs font-medium text-primary bg-primary-light px-2 py-0.5 rounded-full">Active</span>`
+        : `<span class="text-xs font-medium text-red-500 bg-red-50 px-2 py-0.5 rounded-full">Inactive</span>`;
+
+     
+      return `
+        <div class="border border-gray-200 rounded-xl p-5 flex items-center gap-4 hover:shadow-sm transition">
+
+          <!-- Avatar -->
+          <div class="w-14 h-14 rounded-full ${avColor} flex items-center justify-center font-bold text-sm shrink-0">
+            ${initials(s.first_name, s.last_name)}
+          </div>
+
+          <!-- Info -->
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap mb-0.5">
+              <p class="font-bold text-gray-900">${fullName}</p>
+            </div>
+            <div class="flex items-center gap-3 flex-wrap mt-1">
+              <span class="text-xs font-medium px-2.5 py-0.5 rounded-full border ${role.cls}">
+                ${role.label}
+              </span>
+              ${s.contact_number ? `
+                <span class="text-xs text-gray-400 flex items-center gap-1">
+                  <i class="ti ti-phone text-gray-300"></i>${s.contact_number}
+                </span>` : ''}
+              ${s.gender ? `
+                <span class="text-xs text-gray-400 flex items-center gap-1">
+                  <i class="ti ti-gender-bigender text-gray-300"></i>${s.gender}
+                </span>` : ''}
+              ${age ? `
+                <span class="text-xs text-gray-400 flex items-center gap-1">
+                  <i class="ti ti-cake text-gray-300"></i>${age} yrs
+                </span>` : ''}
+              ${s.address_line1 ? `
+                <span class="text-xs text-gray-400 flex items-center gap-1">
+                  <i class="ti ti-map-pin text-gray-300"></i>${s.address_line1}
+                </span>` : ''}
+            </div>
+            <p class="text-xs text-gray-300 mt-1.5">
+              Staff ID: ST-${String(s.staff_id).padStart(4, '0')}
+              &nbsp;·&nbsp; Joined ${formatDate(s.created_at)}
+            </p>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex items-center gap-2 shrink-0">
+            <button
+              onclick="viewStaff(${s.staff_id})"
+              class="border border-gray-200 text-gray-700 hover:bg-gray-50 text-sm font-medium px-4 py-2 rounded-lg transition"
+            >
+              View Details
+            </button>
+           
+          </div>
+
+        </div>
+      `;
+    }
+
+    // ── Render list ───────────────────────────────────
+    function renderStaff(list) {
+      const container = document.getElementById('staff-container');
+      const empty     = document.getElementById('empty-state');
+
+      if (!list || list.length === 0) {
+        container.classList.add('hidden');
+        empty.classList.remove('hidden');
+        return;
+      }
+
+      empty.classList.add('hidden');
+      container.innerHTML = list.map(staffCard).join('');
+      container.classList.remove('hidden');
+    }
+
+    // ── Filter ────────────────────────────────────────
+    function filterStaff() {
+      const q      = document.getElementById('search-input').value.toLowerCase();
+      const role   = document.getElementById('role-filter').value;
+
+      const filtered = allStaff.filter(s => {
+        const name      = `${s.first_name} ${s.last_name}`.toLowerCase();
+        const matchName = name.includes(q);
+        const matchRole = role ? s.staff_role === role : true;
+        return matchName && matchRole;
+      });
+
+      renderStaff(filtered);
+    }
+
+    // ── Load staff ────────────────────────────────────
+    async function loadStaff() {
+      try {
+        const res  = await fetch(`${API_BASE}/fetchStaff`, {
+          headers: {
+            'Content-Type':  'application/json',
+            'Authorization': `Bearer ${getToken()}`,
+          }
+        });
+
+        const json = await res.json();
+        allStaff   = json.data ?? [];
+
+        renderStaff(allStaff);
+
+      } catch (err) {
+        document.getElementById('error-state').classList.remove('hidden');
+        console.error(err);
+      } finally {
+        document.getElementById('loading-skeleton').classList.add('hidden');
+      }
+    }
+
+    // ── View single staff ─────────────────────────────
+    function viewStaff(id) {
+      window.location.href = `/admin/staff/${id}`;
+    }
+
+    // ── Toggle active/deactivate ──────────────────────
+    async function toggleStaff(id) {
+      const staffRecord = allStaff.find(s => s.staff_id === id);
+      if (!staffRecord) return;
+
+      const targetStatus = staffRecord.is_active ? 0 : 1;
+      const btn          = document.getElementById(`toggle-staff-${id}`);
+
+      btn.disabled      = true;
+      btn.style.opacity = '0.5';
+
+      try {
+        const res = await fetch(`${API_BASE}/staff/${id}/toggle`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type':  'application/json',
+            'Authorization': `Bearer ${getToken()}`,
+          },
+          body: JSON.stringify({ is_active: targetStatus }),
+        });
+
+        const json = await res.json();
+
+        if (res.ok) {
+          staffRecord.is_active = targetStatus;
+          filterStaff();
+        } else {
+          showFlash(json.message ?? 'Failed to update staff status', 'error');
+          btn.disabled      = false;
+          btn.style.opacity = '1';
+        }
+
+      } catch (err) {
+        showFlash('Network error: ' + err.message, 'error');
+        btn.disabled      = false;
+        btn.style.opacity = '1';
+      }
+    }
+
+    // ── Init ──────────────────────────────────────────
+    
+    loadStaff();
+  </script>
+  <script src="/js/tabs.js"></script>
+  <script src="/js/stats.js"></script>
+
+<%- include('../error_flash.ejs') %>
+</body>
+</html>
